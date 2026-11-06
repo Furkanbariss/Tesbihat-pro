@@ -80,7 +80,7 @@ object PresetContent {
         ),
         Zikir(
             id = TEHLIL_ID,
-            arabic = "لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+            arabic = "لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
             transliterationTr = "Lâ ilâhe illallâh vahdehû lâ şerîke leh, lehü’l-mülkü ve lehü’l-hamdü ve hüve alâ külli şey’in kadîr",
             transliterationEn = "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa huwa ala kulli shay'in qadir",
             meaningTr = "Allah’tan başka ilâh yoktur; yalnız Allah vardır. O tektir, ortağı yoktur. Mülk O’nundur, hamd O’na mahsustur. O’nun gücü her şeye yeter.",

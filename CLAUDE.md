@@ -149,7 +149,7 @@ object CounterEngine {
 | Estağfirullah | أَسْتَغْفِرُ اللّٰهَ | Estağfirullâh | Allah'tan bağışlanma dilerim | 100 |
 | Kelime-i tevhid | لَا إِلٰهَ إِلَّا اللّٰهُ | Lâ ilâhe illallâh | Allah'tan başka ilâh yoktur | 100 |
 | Salavat | اَللّٰهُمَّ صَلِّ عَلٰى سَيِّدِنَا مُحَمَّدٍ | Allâhümme salli alâ seyyidinâ Muhammed | Allah'ım, efendimiz Muhammed'e salat eyle | 100 |
-| Tehlil | لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ | Lâ ilâhe illallâh vahdehû lâ şerîke leh, lehü’l-mülkü ve lehü’l-hamdü ve hüve alâ külli şey’in kadîr | Allah’tan başka ilâh yoktur; yalnız Allah vardır. O tektir, ortağı yoktur. Mülk O’nundur, hamd O’na mahsustur. O’nun gücü her şeye yeter. | 1 |
+| Tehlil | لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ | Lâ ilâhe illallâh vahdehû lâ şerîke leh, lehü’l-mülkü ve lehü’l-hamdü ve hüve alâ külli şey’in kadîr | Allah’tan başka ilâh yoktur; yalnız Allah vardır. O tektir, ortağı yoktur. Mülk O’nundur, hamd O’na mahsustur. O’nun gücü her şeye yeter. | 1 |
 
 Dini içerikte tek ölçü Diyanet'tir. Metinler yayından önce Diyanet kaynaklarından kontrol edilmeli. Claude Code kullanıcı istemedikçe bu tabloya metin eklemez, değiştirmez.
 
