@@ -131,11 +131,11 @@ object CounterEngine {
 
 **Davranış**
 
-1. `Tap`: sayı 1 artar ve `Tick` döner. Sayı hedefe ulaşırsa `StepCompleted` döner; son adım değilse bir sonraki adıma geçilir ve sayı 0 olur. Son adımsa `completed = true` olur ve `SequenceCompleted` döner.
+1. `Tap`: sayı 1 artar ve `Tick` döner. Sayı hedefe ulaşırsa `StepCompleted` döner; son adım değilse bir sonraki adıma geçilir ve sayı 0 olur. Son adımsa `completed = true` olur ve `SequenceCompleted` döner. `Transition` tek efekt taşır, en güçlüsü döner: `SequenceCompleted` > `StepCompleted` > `Milestone` > `Tick`.
 2. `completed` iken `Tap` yok sayılır (efekt yok). Ekranda "Tamamlandı, yeniden başla" düğmesi `ResetAll` gönderir.
 3. Sınırsız adımda (`target == null`) `Tap` hiç tamamlanmaz; her 33'te bir `Milestone` döner.
 4. `Undo`: sayı > 0 ise 1 azalır. Sayı 0 ve önceki adım varsa o adıma `target - 1` ile dönülür. `completed` iken son adıma `target - 1` ile dönülür. Efekt yok.
-5. `ResetStep`: sayı 0 olur. `ResetAll`: ilk adım, sayı 0, `completed = false`.
+5. `ResetStep`: sayı 0 ve `completed = false` olur. `ResetAll`: ilk adım, sayı 0, `completed = false`.
 
 **Zorunlu birim testleri**: her olay için normal durum; adım geçişi; son adımda tamamlanma; tamamlanmışken Tap; adım sınırında Undo; tamamlanmışken Undo; sınırsız sayımda 33 ve 66'da Milestone; 1.000 ardışık Tap sonrası tutarlı durum.
 
@@ -151,6 +151,8 @@ object CounterEngine {
 | Salavat | اَللّٰهُمَّ صَلِّ عَلٰى سَيِّدِنَا مُحَمَّدٍ | Allâhümme salli alâ seyyidinâ Muhammed | Allah'ım, efendimiz Muhammed'e salat eyle | 100 |
 
 Metinler yayından önce güvenilir bir kaynaktan (ör. Diyanet) kontrol edilmeli. Claude Code bu tabloya metin eklemez, değiştirmez.
+
+İstisna: İngilizce okunuş ve anlamlar kullanıcının izniyle Faz 2'de `PresetContent.kt`'ye eklendi; Arapça ve Türkçe metinler değişmedi. Kaynak IslamQA (228520, 131850, 20054). Salavattaki "our master" karşılığı `sayyidina` içindir ve bu sayfalarda geçmez.
 
 ## Veri katmanı
 
