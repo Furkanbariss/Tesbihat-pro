@@ -4,6 +4,7 @@ import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.DailyCount
+import com.furkanbarissonmezisik.tesbihatpro.testing.FakeAdsController
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeContentVersionStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeDailyCountDao
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeZikirDao
@@ -51,6 +52,7 @@ class HistoryViewModelTest {
                 FakeContentVersionStore(),
                 backgroundScope,
             ),
+            adsController = FakeAdsController(),
             today = today,
         )
         backgroundScope.launch { viewModel.uiState.collect {} }

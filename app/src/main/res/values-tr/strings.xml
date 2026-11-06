@@ -56,4 +56,5 @@
     <string name="bead_style_dark_wood">Koyu ahşap</string>
     <string name="settings_section_about">Hakkında</string>
     <string name="settings_about_version">Sürüm %1$s</string>
+    <string name="settings_privacy_options">Gizlilik seçenekleri</string>
 </resources>

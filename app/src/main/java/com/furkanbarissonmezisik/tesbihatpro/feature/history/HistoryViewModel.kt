@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.furkanbarissonmezisik.tesbihatpro.TesbihApp
+import com.furkanbarissonmezisik.tesbihatpro.core.ads.AdsController
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.DailyCount
@@ -65,6 +66,7 @@ internal fun historyUiState(
 class HistoryViewModel(
     historyRepository: HistoryRepository,
     zikirRepository: ZikirRepository,
+    val adsController: AdsController,
     today: LocalDate = LocalDate.now(),
 ) : ViewModel() {
 
@@ -82,7 +84,11 @@ class HistoryViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = (this[APPLICATION_KEY] as TesbihApp).container
-                HistoryViewModel(container.historyRepository, container.zikirRepository)
+                HistoryViewModel(
+                    historyRepository = container.historyRepository,
+                    zikirRepository = container.zikirRepository,
+                    adsController = container.adsController,
+                )
             }
         }
     }

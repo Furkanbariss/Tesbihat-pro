@@ -61,4 +61,5 @@
     <string name="bead_style_dark_wood">Dark wood</string>
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_privacy_options">Privacy options</string>
 </resources>

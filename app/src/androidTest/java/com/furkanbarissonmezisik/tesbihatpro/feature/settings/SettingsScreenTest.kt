@@ -29,14 +29,21 @@ class SettingsScreenTest {
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private fun show(initial: AppSettings = AppSettings()): () -> AppSettings {
+    private var privacyClicks = 0
+
+    private fun show(
+        initial: AppSettings = AppSettings(),
+        privacyOptionsRequired: Boolean = false,
+    ): () -> AppSettings {
         var settings by mutableStateOf(initial)
         composeRule.setContent {
             TesbihatProTheme {
                 SettingsScreen(
                     settings = settings,
                     versionName = "1.2",
+                    privacyOptionsRequired = privacyOptionsRequired,
                     onBack = {},
+                    onPrivacyOptions = { privacyClicks++ },
                     onSoundChange = { settings = settings.copy(soundEnabled = it) },
                     onHapticsChange = { settings = settings.copy(hapticsEnabled = it) },
                     onVolumeKeysChange = { settings = settings.copy(volumeKeysEnabled = it) },
@@ -106,6 +113,22 @@ class SettingsScreenTest {
         show(AppSettings(beadStyleId = "removed_model"))
 
         row(R.string.bead_style_amber).assertIsSelected()
+    }
+
+    @Test
+    fun privacyEntryIsHiddenWhenNotRequired() {
+        show()
+
+        row(R.string.settings_privacy_options).assertDoesNotExist()
+    }
+
+    @Test
+    fun privacyEntryOpensTheFormWhenRequired() {
+        show(privacyOptionsRequired = true)
+
+        row(R.string.settings_privacy_options).performScrollTo().performClick()
+
+        assertEquals(1, privacyClicks)
     }
 
     @Test

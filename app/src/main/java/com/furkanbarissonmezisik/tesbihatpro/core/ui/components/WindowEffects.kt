@@ -45,7 +45,7 @@ private fun rememberWindow(): Window {
     return remember(view) { view.context.findActivity().window }
 }
 
-private tailrec fun Context.findActivity(): Activity = when (this) {
+internal tailrec fun Context.findActivity(): Activity = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> error("Pencere etkisi bir Activity dışında kullanılamaz")

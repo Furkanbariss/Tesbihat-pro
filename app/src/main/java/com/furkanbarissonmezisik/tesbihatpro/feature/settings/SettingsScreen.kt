@@ -1,5 +1,6 @@
 package com.furkanbarissonmezisik.tesbihatpro.feature.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -32,8 +34,10 @@ import com.furkanbarissonmezisik.tesbihatpro.R
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.AppSettings
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.ThemeMode
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.BeadStyles
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.BannerAd
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.DetailTopBar
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.SectionTitle
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.findActivity
 
 @Composable
 fun SettingsRoute(
@@ -41,9 +45,12 @@ fun SettingsRoute(
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory),
 ) {
     val settings by viewModel.settings.collectAsState()
+    val privacyOptionsRequired by viewModel.privacyOptionsRequired.collectAsState()
+    val view = LocalView.current
     SettingsScreen(
         settings = settings,
         versionName = BuildConfig.VERSION_NAME,
+        privacyOptionsRequired = privacyOptionsRequired,
         onBack = onBack,
         onSoundChange = viewModel::onSoundChange,
         onHapticsChange = viewModel::onHapticsChange,
@@ -51,6 +58,8 @@ fun SettingsRoute(
         onKeepScreenOnChange = viewModel::onKeepScreenOnChange,
         onThemeChange = viewModel::onThemeChange,
         onBeadStyleChange = viewModel::onBeadStyleChange,
+        onPrivacyOptions = { viewModel.onPrivacyOptions(view.context.findActivity()) },
+        adBanner = { BannerAd(viewModel.adsController) },
     )
 }
 
@@ -58,6 +67,7 @@ fun SettingsRoute(
 fun SettingsScreen(
     settings: AppSettings,
     versionName: String,
+    privacyOptionsRequired: Boolean,
     onBack: () -> Unit,
     onSoundChange: (Boolean) -> Unit,
     onHapticsChange: (Boolean) -> Unit,
@@ -65,11 +75,14 @@ fun SettingsScreen(
     onKeepScreenOnChange: (Boolean) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
     onBeadStyleChange: (String) -> Unit,
+    onPrivacyOptions: () -> Unit,
+    adBanner: @Composable () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
             DetailTopBar(title = stringResource(R.string.screen_settings), onBack = onBack)
         },
+        bottomBar = adBanner,
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -131,6 +144,16 @@ fun SettingsScreen(
                 )
             }
             item { SectionTitle(stringResource(R.string.settings_section_about)) }
+            if (privacyOptionsRequired) {
+                item {
+                    ListItem(
+                        modifier = Modifier.clickable(onClick = onPrivacyOptions),
+                        headlineContent = {
+                            Text(stringResource(R.string.settings_privacy_options))
+                        },
+                    )
+                }
+            }
             item {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.app_name)) },

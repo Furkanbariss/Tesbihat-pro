@@ -1,8 +1,9 @@
 package com.furkanbarissonmezisik.tesbihatpro.di
 
 import android.content.Context
+import com.furkanbarissonmezisik.tesbihatpro.core.ads.AdMobAdsController
 import com.furkanbarissonmezisik.tesbihatpro.core.ads.AdsController
-import com.furkanbarissonmezisik.tesbihatpro.core.ads.NoOpAdsController
+import com.furkanbarissonmezisik.tesbihatpro.core.ads.UmpConsentManager
 import com.furkanbarissonmezisik.tesbihatpro.core.billing.FakePremiumRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.billing.PremiumRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.db.AppDatabase
@@ -18,6 +19,7 @@ import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundPoolController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.VibratorHapticsController
 import com.furkanbarissonmezisik.tesbihatpro.core.input.VolumeKeyDispatcher
+import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +30,14 @@ class AppContainer(context: Context) {
     /** Ekran kapansa da bitmesi gereken işler (bekleyen disk yazımları) için. */
     val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    val adsController: AdsController = NoOpAdsController
+    val adsController: AdsController = AdMobAdsController(
+        consent = UmpConsentManager(context),
+        initializeAds = { onReady ->
+            applicationScope.launch(Dispatchers.IO) {
+                MobileAds.initialize(context) { onReady() }
+            }
+        },
+    )
     val premiumRepository: PremiumRepository = FakePremiumRepository()
 
     private val database = AppDatabase.build(context)

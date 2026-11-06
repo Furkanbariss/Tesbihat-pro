@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.furkanbarissonmezisik.tesbihatpro.R
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.BannerAd
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.DetailTopBar
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.SectionTitle
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.displayTransliteration
@@ -40,15 +41,24 @@ fun HistoryRoute(
     viewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    HistoryScreen(uiState = uiState, onBack = onBack)
+    HistoryScreen(
+        uiState = uiState,
+        onBack = onBack,
+        adBanner = { BannerAd(viewModel.adsController) },
+    )
 }
 
 @Composable
-fun HistoryScreen(uiState: HistoryUiState, onBack: () -> Unit) {
+fun HistoryScreen(
+    uiState: HistoryUiState,
+    onBack: () -> Unit,
+    adBanner: @Composable () -> Unit = {},
+) {
     Scaffold(
         topBar = {
             DetailTopBar(title = stringResource(R.string.screen_history), onBack = onBack)
         },
+        bottomBar = adBanner,
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier

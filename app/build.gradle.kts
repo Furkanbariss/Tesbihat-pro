@@ -1,8 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+// Gerçek AdMob kimlikleri yalnız local.properties'te durur, repoya girmez ve yalnız release'e geçer.
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { load(it) }
+}
+val testAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
+val testBannerUnitId = "ca-app-pub-3940256099942544/9214589741"
 
 android {
     namespace = "com.furkanbarissonmezisik.tesbihatpro"
@@ -21,7 +30,24 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["admobAppId"] = testAdMobAppId
+            buildConfigField("String", "ADMOB_BANNER_UNIT_ID", "\"$testBannerUnitId\"")
+            buildConfigField(
+                "String",
+                "UMP_TEST_DEVICE_HASH",
+                "\"${localProperties.getProperty("ump.testDeviceHash", "")}\"",
+            )
+        }
         release {
+            manifestPlaceholders["admobAppId"] =
+                localProperties.getProperty("admob.appId", testAdMobAppId)
+            buildConfigField(
+                "String",
+                "ADMOB_BANNER_UNIT_ID",
+                "\"${localProperties.getProperty("admob.bannerUnitId", testBannerUnitId)}\"",
+            )
+            buildConfigField("String", "UMP_TEST_DEVICE_HASH", "\"\"")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
@@ -58,6 +84,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))

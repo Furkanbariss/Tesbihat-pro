@@ -78,7 +78,7 @@ app/src/main/java/com/furkanbarissonmezisik/tesbihatpro/
 │   │   └── repository/       // ZikirRepository, HistoryRepository, SettingsRepository, SessionRepository
 │   ├── feedback/             // HapticsController, SoundController
 │   ├── input/                // VolumeKeyDispatcher
-│   ├── ads/                  // AdsController (arayüz), AdMobAdsController, NoOpAdsController, ConsentManager
+│   ├── ads/                  // AdsController (arayüz), AdMobAdsController, ConsentManager
 │   ├── billing/              // PremiumRepository (arayüz), PlayBillingPremiumRepository, FakePremiumRepository
 │   └── ui/                   // theme/, components/ (BannerAd vb.)
 └── feature/
@@ -236,17 +236,20 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 
 Sayım ekranında hiçbir zaman reklam gösterilmez; gelir, Geçmiş ve Ayarlar ekranındaki banner ile tek seferlik "Reklamları kaldır" satın almasından gelir.
 
+**İbadet kuralı**: İbadet sırasında açılabilecek ekranlarda (Tesbih, Zikirler, ileride müezzin modu) reklam olmaz. Bu ekranlarda reklam kodu hiç çalışmaz, reklam için ağ trafiği de oluşmaz; yeni ekran eklerken bu soru sorulur.
+
 **Onay ve başlatma**
 
-- Açılışta `ConsentManager` (UMP) onay bilgisini günceller, gerekiyorsa formu gösterir. `canRequestAds` true olmadan reklam isteği yapılmaz.
+- `ConsentManager` (UMP) uygulama açılışında değil, ilk reklamlı ekrana (Geçmiş veya Ayarlar) girişte çalışır: onay bilgisini günceller, gerekiyorsa formu gösterir. Form açılışta çıksaydı ibadet sırasında Tesbih ekranını kapatırdı. `canRequestAds` true olmadan reklam isteği yapılmaz.
 - `MobileAds` onaydan sonra arka planda başlatılır.
 - Ayarlarda, UMP gerektiriyorsa "Gizlilik seçenekleri" girişi gösterilir.
 
 **Banner**
 
-- Uyarlanabilir (adaptive) banner, yalnızca Geçmiş ve Ayarlar ekranlarının altında.
+- Uyarlanabilir (adaptive) banner (`AdSize.getLargeAnchoredAdaptiveBannerAdSize`), yalnızca Geçmiş ve Ayarlar ekranlarının altında.
 - `isPremium` true ise hiç yüklenmez.
-- Debug derlemede yalnızca Google'ın resmi test reklam birimi ID'leri kullanılır. Gerçek App ID ve birim ID'leri `local.properties`'ten okunup yalnız release derlemesine manifest placeholder / `BuildConfig` ile verilir; repoya girmez.
+- Debug derlemede yalnızca Google'ın resmi test reklam birimi ID'leri kullanılır. Gerçek App ID ve birim ID'leri `local.properties`'ten (`admob.appId`, `admob.bannerUnitId`) okunup yalnız release derlemesine manifest placeholder / `BuildConfig` ile verilir; repoya girmez. Anahtarlar yoksa release de test kimlikleriyle derlenir, yayından önce mutlaka girilmeli.
+- AB onay formunu denemek için `local.properties`'e `ump.testDeviceHash=<logcat'teki cihaz kimliği>` eklenir; yalnız debug'da etkilidir, denemeden sonra silinir.
 - Kendi gerçek reklamına tıklamak AdMob hesabını riske atar; geliştirmede her zaman test ID.
 
 **"Reklamları kaldır"**
@@ -278,7 +281,7 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
     - Kabul: sayılanlar Geçmiş'te doğru toplamla görünür; Undo toplamı düşürür.
 7. **Ayarlar ve girdi**: `SettingsStore`, ses tuşları, ekranı açık tut, karartma modu, tema.
     - Kabul: her ayar uygulama yeniden açılınca korunur; ayar kapalıyken ses tuşları sesi değiştirir.
-8. **Reklam**: UMP ve AdMob banner (test ID'leri), `NoOpAdsController` yerine gerçek controller.
+8. **Reklam**: UMP ve AdMob banner (test ID'leri), gerçek `AdMobAdsController`.
     - Kabul: banner yalnız Geçmiş ve Ayarlar'da görünür; Tesbih ve Zikirler ekranında hiç reklam isteği yapılmaz.
 9. **Satın alma**: Play Billing, `remove_ads`, onaylama, banner'ın gizlenmesi.
     - Kabul: lisans test hesabıyla satın alınınca banner kaybolur ve yeniden açılışta gizli kalır.
@@ -290,6 +293,7 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
 Bu bölüm Claude Code'a doğrudan talimattır; dosya proje kökünde `CLAUDE.md` olarak durduğu için her oturumda okunur.
 
 - Her seferinde yalnızca istenen fazı uygula. Faz sonunda `./gradlew assembleDebug` ve `./gradlew test` geçmeli; ardından kısa bir özet ver ve dur.
+- İbadet sırasında açılabilecek ekranlara reklam veya reklamla ilgili kesinti koyma.
 - Bu dokümanda olmayan bir kütüphane ekleme; gerekiyorsa önce sor.
 - Bağımlılıkları yalnızca `gradle/libs.versions.toml` üzerinden ekle. Emin olmadığın bir sürümü uydurma, sor.
 - `core/domain` ve `core/content` içinde `android.*` veya `androidx.*` import'u olmaz.
