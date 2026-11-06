@@ -30,4 +30,8 @@
     <string name="zikirs_field_target_hint">Sınırsız için boş bırak</string>
     <string name="action_save">Kaydet</string>
     <string name="action_delete">Sil</string>
+    <string name="history_today">Bugün</string>
+    <string name="history_empty">Bugün henüz sayım yok</string>
+    <string name="history_last_30_days">Son 30 gün</string>
+    <string name="history_deleted_zikir">Silinmiş zikir</string>
 </resources>

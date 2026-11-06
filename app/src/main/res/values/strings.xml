@@ -35,4 +35,8 @@
     <string name="zikirs_field_target_hint">Leave empty for unlimited</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
+    <string name="history_today">Today</string>
+    <string name="history_empty">No counts yet today</string>
+    <string name="history_last_30_days">Last 30 days</string>
+    <string name="history_deleted_zikir">Deleted dhikr</string>
 </resources>

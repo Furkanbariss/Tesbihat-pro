@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +35,7 @@ import com.furkanbarissonmezisik.tesbihatpro.R
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.Zikir
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.ZikirDraft
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.DetailTopBar
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.SectionTitle
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.displayMeaning
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.displayTransliteration
 
@@ -162,16 +162,6 @@ private fun TesbihatCard(summary: String, onClick: () -> Unit) {
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         )
     }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-    )
 }
 
 @Composable

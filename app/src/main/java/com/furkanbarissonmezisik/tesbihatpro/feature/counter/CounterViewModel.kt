@@ -8,10 +8,12 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.furkanbarissonmezisik.tesbihatpro.TesbihApp
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEngine
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEvent
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.countDelta
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.CounterState
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.TesbihatStep
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.Zikir
@@ -44,6 +46,7 @@ sealed interface CounterUiState {
 class CounterViewModel(
     private val sessionRepository: SessionRepository,
     private val zikirRepository: ZikirRepository,
+    private val historyRepository: HistoryRepository,
     private val haptics: HapticsController,
     private val sound: SoundController,
 ) : ViewModel() {
@@ -85,6 +88,9 @@ class CounterViewModel(
         if (transition.state != current) {
             show(transition.state)
             sessionRepository.save(transition.state)
+            countDelta(event, current, transition.state)?.let { delta ->
+                historyRepository.record(delta.zikirId, delta.amount)
+            }
         }
     }
 
@@ -140,6 +146,7 @@ class CounterViewModel(
                 CounterViewModel(
                     sessionRepository = container.sessionRepository,
                     zikirRepository = container.zikirRepository,
+                    historyRepository = container.historyRepository,
                     haptics = container.hapticsController,
                     sound = container.soundController,
                 )

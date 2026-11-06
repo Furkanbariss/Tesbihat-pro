@@ -8,6 +8,7 @@ import com.furkanbarissonmezisik.tesbihatpro.core.billing.PremiumRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.db.AppDatabase
 import com.furkanbarissonmezisik.tesbihatpro.core.data.prefs.DataStoreContentVersionStore
 import com.furkanbarissonmezisik.tesbihatpro.core.data.prefs.DataStoreSessionStore
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.HapticsController
@@ -35,10 +36,12 @@ class AppContainer(context: Context) {
         contentVersion = DataStoreContentVersionStore(context),
         scope = applicationScope,
     )
+    val historyRepository = HistoryRepository(database.dailyCountDao(), applicationScope)
     val hapticsController: HapticsController = VibratorHapticsController(context)
     val soundController: SoundController = SoundPoolController(context)
 
     fun flushPendingWrites() {
         applicationScope.launch { sessionRepository.flush() }
+        applicationScope.launch { historyRepository.flush() }
     }
 }

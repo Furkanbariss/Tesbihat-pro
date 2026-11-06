@@ -1,6 +1,7 @@
 package com.furkanbarissonmezisik.tesbihatpro.feature.counter
 
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEffect
@@ -10,8 +11,10 @@ import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.ZikirDraft
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.HapticsController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundController
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeContentVersionStore
+import com.furkanbarissonmezisik.tesbihatpro.testing.FakeDailyCountDao
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeSessionStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeZikirDao
+import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -36,6 +39,8 @@ class CounterViewModelTest {
     private val mainDispatcher: TestDispatcher = StandardTestDispatcher()
     private val store = FakeSessionStore()
     private val dao = FakeZikirDao()
+    private val dailyDao = FakeDailyCountDao()
+    private val day = "2027-02-08"
     private val haptics = RecordingHaptics()
     private val sound = RecordingSound()
 
@@ -52,9 +57,22 @@ class CounterViewModelTest {
         return repository
     }
 
+    private fun TestScope.historyRepository() = HistoryRepository(
+        dao = dailyDao,
+        scope = backgroundScope,
+        ioDispatcher = mainDispatcher,
+        today = { LocalDate.parse(day) },
+    )
+
+    private fun TestScope.passWriteDelay() {
+        advanceTimeBy(301)
+        runCurrent()
+    }
+
     private fun TestScope.createViewModel() = CounterViewModel(
         sessionRepository = sessionRepository(),
         zikirRepository = ZikirRepository(dao, FakeContentVersionStore(), backgroundScope),
+        historyRepository = historyRepository(),
         haptics = haptics,
         sound = sound,
     )
@@ -328,6 +346,7 @@ class CounterViewModelTest {
         val viewModel = CounterViewModel(
             sessionRepository = session,
             zikirRepository = ownZikirRepository(),
+            historyRepository = historyRepository(),
             haptics = haptics,
             sound = sound,
         )
@@ -401,7 +420,119 @@ class CounterViewModelTest {
         assertEquals(4, viewModel.ready().stepCount)
     }
 
+
+    @Test
+    fun `taps are added to the daily total`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel()
+        runCurrent()
+
+        repeat(3) { viewModel.onTap() }
+        passWriteDelay()
+
+        assertEquals(3, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+    }
+
+    @Test
+    fun `tap that finishes a step counts for the finished zikir`() = runTest(mainDispatcher) {
+        store.stored = CounterState(PresetContent.defaultTesbihat, count = 32)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onTap()
+        passWriteDelay()
+
+        assertEquals(1, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+        assertEquals(null, dailyDao.count(day, PresetContent.ELHAMDULILLAH_ID))
+    }
+
+    @Test
+    fun `whole tesbihat adds up to one hundred`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel()
+        runCurrent()
+
+        repeat(100) { viewModel.onTap() }
+        passWriteDelay()
+
+        assertEquals(33, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+        assertEquals(33, dailyDao.count(day, PresetContent.ELHAMDULILLAH_ID))
+        assertEquals(33, dailyDao.count(day, PresetContent.ALLAHU_EKBER_ID))
+        assertEquals(1, dailyDao.count(day, PresetContent.TEHLIL_ID))
+    }
+
+    @Test
+    fun `undo lowers the daily total`() = runTest(mainDispatcher) {
+        dailyDao.put(day, PresetContent.SUBHANALLAH_ID, 10)
+        store.stored = CounterState(PresetContent.defaultTesbihat, count = 10)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onUndo()
+        passWriteDelay()
+
+        assertEquals(9, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+    }
+
+    @Test
+    fun `undo at a step boundary lowers the previous zikir`() = runTest(mainDispatcher) {
+        dailyDao.put(day, PresetContent.SUBHANALLAH_ID, 33)
+        store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 1)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onUndo()
+        passWriteDelay()
+
+        assertEquals(32, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+    }
+
+    @Test
+    fun `tap while completed adds nothing to the daily total`() = runTest(mainDispatcher) {
+        store.stored = CounterState(
+            PresetContent.defaultTesbihat,
+            stepIndex = 3,
+            count = 1,
+            completed = true,
+        )
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onTap()
+        passWriteDelay()
+
+        assertEquals(null, dailyDao.count(day, PresetContent.TEHLIL_ID))
+    }
+
+    @Test
+    fun `resets leave the daily total alone`() = runTest(mainDispatcher) {
+        dailyDao.put(day, PresetContent.SUBHANALLAH_ID, 12)
+        store.stored = CounterState(PresetContent.defaultTesbihat, count = 12)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onResetStep()
+        viewModel.onResetAll()
+        passWriteDelay()
+
+        assertEquals(12, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+    }
+
+    @Test
+    fun `selecting another zikir leaves the daily total alone`() = runTest(mainDispatcher) {
+        dailyDao.put(day, PresetContent.SUBHANALLAH_ID, 12)
+        store.stored = CounterState(PresetContent.defaultTesbihat, count = 12)
+        createViewModel()
+        runCurrent()
+
+        repository.requestSteps(listOf(TesbihatStep(PresetContent.SALAVAT_ID, 100)))
+        runCurrent()
+        passWriteDelay()
+
+        assertEquals(12, dailyDao.count(day, PresetContent.SUBHANALLAH_ID))
+        assertEquals(null, dailyDao.count(day, PresetContent.SALAVAT_ID))
+    }
+
     private class RecordingHaptics : HapticsController {
+
 
         val effects = mutableListOf<CounterEffect>()
 
