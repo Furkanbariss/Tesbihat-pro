@@ -8,7 +8,7 @@ MVP, namaz sonrası tesbihatı ve serbest zikri dokunarak, titreşimle ve ses tu
 **MVP'de olanlar**
 
 - Kayan boncuklu tesbih ekranı: dokunma, kaydırma, tık sesi, titreşim
-- Tesbihat akışı: 33 Sübhanallah → 33 Elhamdülillah → 33 Allahu Ekber, adımlar arası otomatik geçiş
+- Tesbihat akışı: 33 Sübhanallah → 33 Elhamdülillah → 33 Allahu Ekber → yüze tamamlayan 1 tehlil, adımlar arası otomatik geçiş
 - Hazır zikirler ve kullanıcının kendi zikri, hedef sayısıyla
 - Ses tuşlarıyla sayma, ekranı açık tutma, karartma modu
 - Günlük geçmiş (zikir başına toplam)
@@ -139,7 +139,7 @@ object CounterEngine {
 
 **Zorunlu birim testleri**: her olay için normal durum; adım geçişi; son adımda tamamlanma; tamamlanmışken Tap; adım sınırında Undo; tamamlanmışken Undo; sınırsız sayımda 33 ve 66'da Milestone; 1.000 ardışık Tap sonrası tutarlı durum.
 
-**Hazır içerik** (`PresetContent.kt`, tek kaynak). Varsayılan tesbihat: ilk üç satır, her biri 33.
+**Hazır içerik** (`PresetContent.kt`, tek kaynak). Varsayılan tesbihat Diyanet fetvasına göredir: ilk üç satır 33'er, ardından yüze tamamlayan Tehlil 1 kez.
 
 | Zikir | Arapça | Okunuş | Anlam | Varsayılan hedef |
 | --- | --- | --- | --- | --- |
@@ -147,12 +147,17 @@ object CounterEngine {
 | Elhamdülillah | اَلْحَمْدُ لِلّٰهِ | Elhamdülillâh | Hamd Allah'a mahsustur | 33 |
 | Allahu Ekber | اَللّٰهُ أَكْبَرُ | Allâhü ekber | Allah en büyüktür | 33 |
 | Estağfirullah | أَسْتَغْفِرُ اللّٰهَ | Estağfirullâh | Allah'tan bağışlanma dilerim | 100 |
-| Kelime-i tevhid | لَا إِلٰهَ إِلَّا اللّٰهُ | Lâ ilâhe illallâh | Allah'tan başka ilah yoktur | 100 |
+| Kelime-i tevhid | لَا إِلٰهَ إِلَّا اللّٰهُ | Lâ ilâhe illallâh | Allah'tan başka ilâh yoktur | 100 |
 | Salavat | اَللّٰهُمَّ صَلِّ عَلٰى سَيِّدِنَا مُحَمَّدٍ | Allâhümme salli alâ seyyidinâ Muhammed | Allah'ım, efendimiz Muhammed'e salat eyle | 100 |
+| Tehlil | لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ | Lâ ilâhe illallâh vahdehû lâ şerîke leh, lehü’l-mülkü ve lehü’l-hamdü ve hüve alâ külli şey’in kadîr | Allah’tan başka ilâh yoktur; yalnız Allah vardır. O tektir, ortağı yoktur. Mülk O’nundur, hamd O’na mahsustur. O’nun gücü her şeye yeter. | 1 |
 
-Metinler yayından önce güvenilir bir kaynaktan (ör. Diyanet) kontrol edilmeli. Claude Code bu tabloya metin eklemez, değiştirmez.
+Dini içerikte tek ölçü Diyanet'tir. Metinler yayından önce Diyanet kaynaklarından kontrol edilmeli. Claude Code kullanıcı istemedikçe bu tabloya metin eklemez, değiştirmez.
 
-İstisna: İngilizce okunuş ve anlamlar kullanıcının izniyle Faz 2'de `PresetContent.kt`'ye eklendi; Arapça ve Türkçe metinler değişmedi. Kaynak IslamQA (228520, 131850, 20054). Salavattaki "our master" karşılığı `sayyidina` içindir ve bu sayfalarda geçmez.
+**Kaynaklar**
+
+- Tesbihat sayıları, sırası, Tehlil'in Arapçası ve anlamı: [Din İşleri Yüksek Kurulu fetvası](https://kurul.diyanet.gov.tr/tr/fetva/namazlardan-sonra-tesbihat-nasil-yapilir/0193c42d-56d7-7df9-8636-ceba3a7927e6)
+- Tehlil'in okunuşu: [Bayburt Müftülüğü](https://bayburt.diyanet.gov.tr/sayfalar/contentdetail.aspx?MenuCategory=Kurumsal&contentid=274)
+- İngilizce: "Subhan Allah", "Alhamdulillah", "Allahu Akbar", "La ilaha illallah" yazımları ve "There is no god but Allah" Diyanet'in İngilizce hutbelerinden. Diğer İngilizce anlamlar Diyanet'in Türkçe anlamlarının çevirisidir. Estağfirullah, Salavat ve Tehlil'in İngilizce okunuşu için Diyanet'te İngilizce karşılık bulunamadı, Arapçadan yazıya aktarıldı.
 
 ## Veri katmanı
 
@@ -268,7 +273,7 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
 4. **Boncuk animasyonu**: `TesbihBeads`, sürükleme, imame, `BeadStyle`.
     - Kabul: saniyede 8 dokunuşta sayı ve boncuk konumu tutarlı, belirgin takılma yok.
 5. **Zikirler**: Room, hazır içerik yükleme, liste, ekle/düzenle/sil, seçilen zikri veya tesbihatı sayaçta açma.
-    - Kabul: tesbihat 33-33-33 adımlarıyla baştan sona çalışır; kendi zikrim kaydedilip sayılır.
+    - Kabul: tesbihat 33-33-33-1 adımlarıyla baştan sona çalışır; kendi zikrim kaydedilip sayılır.
 6. **Geçmiş**: `daily_counts`, debounce'lu yazım, son 30 gün ekranı.
     - Kabul: sayılanlar Geçmiş'te doğru toplamla görünür; Undo toplamı düşürür.
 7. **Ayarlar ve girdi**: `SettingsStore`, ses tuşları, ekranı açık tut, karartma modu, tema.
@@ -290,6 +295,7 @@ Bu bölüm Claude Code'a doğrudan talimattır; dosya proje kökünde `CLAUDE.md
 - `core/domain` ve `core/content` içinde `android.*` veya `androidx.*` import'u olmaz.
 - Composable'larda iş mantığı yok: composable olay gönderir, ViewModel motor ve repository'leri çağırır.
 - Kullanıcıya görünen her metin `strings.xml`'de (`values/` İngilizce, `values-tr/` Türkçe). Dini metinler yalnızca `PresetContent.kt`'de durur; yeni dini metin ekleme, mevcutları değiştirme.
+- Dini konularda (metin, sayı, sıra, hüküm) tek ölçü Diyanet'tir: Din İşleri Yüksek Kurulu, Diyanet yayınları ve müftülükler. Başka kaynağa dayanma; Diyanet'te karşılığı yoksa sor.
 - Gerçek AdMob ID'leri, keystore ve imzalama bilgileri koda veya repoya girmez.
 - Hataları yutma; Room, DataStore, AdMob ve Billing hatalarını `Log` ile kaydet.
 - Her faz ayrı commit: `faz-3: sade sayaç ekranı` biçiminde.
@@ -336,7 +342,7 @@ Müezzin modu, saat uygulaması ve ücretli tesbih modelleri için MVP'de ek kod
 Bunlar kod dışı işlerdir ve senin yapman gerekir; hedef, Ramazan'dan önce sıralama toplamak için Jan 15, 2027 tarihinde yayında olmak.
 
 - [ ] Paket adı kesinleşti (Play'de sonradan değiştirilemez)
-- [ ] Hazır zikir metinleri güvenilir bir kaynaktan kontrol edildi
+- [ ] Hazır zikir metinleri Diyanet kaynaklarından kontrol edildi
 - [ ] AdMob: gerçek ID'ler yalnız release derlemesinde; hassas kategoriler engellendi
 - [ ] UMP onay formu AB bölgesi simülasyonuyla (debug geography) test edildi
 - [ ] `remove_ads` ürünü Play Console'da oluşturuldu; lisans test hesabıyla satın alma denendi
