@@ -4,8 +4,6 @@ import android.content.Context
 import com.furkanbarissonmezisik.tesbihatpro.core.ads.AdMobAdsController
 import com.furkanbarissonmezisik.tesbihatpro.core.ads.AdsController
 import com.furkanbarissonmezisik.tesbihatpro.core.ads.UmpConsentManager
-import com.furkanbarissonmezisik.tesbihatpro.core.billing.FakePremiumRepository
-import com.furkanbarissonmezisik.tesbihatpro.core.billing.PremiumRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.db.AppDatabase
 import com.furkanbarissonmezisik.tesbihatpro.core.data.prefs.DataStoreContentVersionStore
 import com.furkanbarissonmezisik.tesbihatpro.core.data.prefs.DataStoreSessionStore
@@ -38,7 +36,6 @@ class AppContainer(context: Context) {
             }
         },
     )
-    val premiumRepository: PremiumRepository = FakePremiumRepository()
 
     private val database = AppDatabase.build(context)
 

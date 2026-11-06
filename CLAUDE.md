@@ -14,13 +14,13 @@ MVP, namaz sonrası tesbihatı ve serbest zikri dokunarak, titreşimle ve ses tu
 - Günlük geçmiş (zikir başına toplam)
 - Ayarlar: ses, titreşim, ses tuşları, ekranı açık tut, tema
 - Türkçe ve İngilizce arayüz
-- AdMob banner (yalnız Geçmiş ve Ayarlar ekranında) ve tek seferlik "Reklamları kaldır" satın alması
+- AdMob banner (yalnız Geçmiş ve Ayarlar ekranında); uygulama ücretsizdir, satın alma yoktur
 
 **Bilerek dışarıda bırakılanlar (sonraki sürümler)**
 
 - Müezzin modu: müezzinin yaptıklarını adım adım izleten, müezzinlerin ve müezzinliği öğrenenlerin takip edeceği ayrı mod
 - Wear OS saat uygulaması ve ana ekran widget'ı
-- Ücretli tesbih modelleri (kehribar, oltu taşı vb.); boncuk görünümü yine de şimdiden veri olarak tanımlanır
+- Yeni tesbih modelleri (oltu taşı vb.); ileride reklamla alınacak, boncuk görünümü yine de şimdiden veri olarak tanımlanır
 - Hesap, bulut eşitleme, namaz vakitleri, hatırlatıcı bildirimler
 - Ek diller (Arapça, Endonezce, Urduca)
 
@@ -43,7 +43,6 @@ Tek Activity, Jetpack Compose ve MVVM ile tek modüllü bir uygulama; kütüphan
 | Ses | `SoundPool` | Düşük gecikmeli tık sesi |
 | Titreşim | `VibrationEffect` | API 26+ |
 | Reklam | Google Mobile Ads (AdMob) + UMP onay SDK'sı | Banner ve AB onayı |
-| Satın alma | Google Play Billing | "Reklamları kaldır" |
 | Test | JUnit + kotlinx-coroutines-test | Motor ve ViewModel testleri |
 | minSdk | 26 (Android 8.0) | `VibrationEffect` ve `java.time` doğrudan kullanılır |
 | compileSdk / targetSdk | Android Studio şablonunun verdiği | Play'in güncel hedef API şartı |
@@ -79,7 +78,6 @@ app/src/main/java/com/furkanbarissonmezisik/tesbihatpro/
 │   ├── feedback/             // HapticsController, SoundController
 │   ├── input/                // VolumeKeyDispatcher
 │   ├── ads/                  // AdsController (arayüz), AdMobAdsController, ConsentManager
-│   ├── billing/              // PremiumRepository (arayüz), PlayBillingPremiumRepository, FakePremiumRepository
 │   └── ui/                   // theme/, components/ (BannerAd vb.)
 └── feature/
     ├── counter/              // CounterScreen, CounterViewModel, TesbihBeads (Canvas), DimOverlay
@@ -174,7 +172,7 @@ Hazır zikirler ilk açılışta `PresetContent`'ten yüklenir. DataStore'daki `
 
 **DataStore**
 
-- `SettingsStore`: soundEnabled, hapticsEnabled, volumeKeysEnabled, keepScreenOn, theme (sistem/açık/koyu), beadStyleId, isPremiumCache
+- `SettingsStore`: soundEnabled, hapticsEnabled, volumeKeysEnabled, keepScreenOn, theme (sistem/açık/koyu), beadStyleId
 - `SessionStore`: aktif adım listesi (zikir id + hedef), stepIndex, count, completed, updatedAt
 
 **Sayımı kaybetmeme kuralı**
@@ -197,7 +195,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 | Tesbih (başlangıç) | Boncuklar, büyük sayı, adımın Arapçası ve okunuşu, adım göstergesi (1/3), geri al, sıfırla, karartma düğmesi | Yok |
 | Zikirler | En üstte "Namaz sonrası tesbihat", altında hazır ve kendi zikirlerin; ekle, düzenle, sil (hazırlar hariç) | Yok |
 | Geçmiş | Bugünün özeti, son 30 gün, gün başına zikir toplamları | Banner |
-| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, reklamları kaldır, gizlilik seçenekleri, hakkında | Banner |
+| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, gizlilik seçenekleri, hakkında | Banner |
 
 **Tesbih boncukları (`TesbihBeads`)**
 
@@ -206,7 +204,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 - Hızlı dokunuşlarda animasyon kuyruğa girmez, doğrudan hedef konuma atlar; sayı hiçbir zaman animasyonu beklemez.
 - Aşağı sürükleme bir boncuk aralığını geçince `Tap` sayılır.
 - Adım hedefinde dizide daha büyük ve farklı biçimli imame boncuğu görünür.
-- Görünüm veriyle tanımlanır: `BeadStyle(id, nameRes, baseColor, highlightColor, threadColor)`. MVP'de 2 ücretsiz stil (kehribar, koyu ahşap); gelecekteki ücretli modeller bu yapıya eklenir.
+- Görünüm veriyle tanımlanır: `BeadStyle(id, nameRes, baseColor, highlightColor, threadColor)`. MVP'de 2 ücretsiz stil (kehribar, koyu ahşap); gelecekteki modeller bu yapıya eklenir.
 
 **Geri bildirim**
 
@@ -232,9 +230,9 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 - Varsayılan `values/` İngilizce, `values-tr/` Türkçe. Arapça metinler string kaynağı değil, `PresetContent` verisidir.
 - TalkBack sayıyı ve adımı okur ("Sübhânallah, 12 / 33"); sistem yazı boyutuna uyum sağlanır.
 
-## Reklam ve satın alma
+## Reklam
 
-Sayım ekranında hiçbir zaman reklam gösterilmez; gelir, Geçmiş ve Ayarlar ekranındaki banner ile tek seferlik "Reklamları kaldır" satın almasından gelir.
+Uygulama ücretsizdir ve hayır için yapılır; satın alma yoktur. Tek gelir Geçmiş ve Ayarlar ekranındaki banner'dır.
 
 **İbadet kuralı**: İbadet sırasında açılabilecek ekranlarda (Tesbih, Zikirler, ileride müezzin modu) reklam olmaz. Bu ekranlarda reklam kodu hiç çalışmaz, reklam için ağ trafiği de oluşmaz; yeni ekran eklerken bu soru sorulur.
 
@@ -247,19 +245,9 @@ Sayım ekranında hiçbir zaman reklam gösterilmez; gelir, Geçmiş ve Ayarlar 
 **Banner**
 
 - Uyarlanabilir (adaptive) banner (`AdSize.getLargeAnchoredAdaptiveBannerAdSize`), yalnızca Geçmiş ve Ayarlar ekranlarının altında.
-- `isPremium` true ise hiç yüklenmez.
 - Debug derlemede yalnızca Google'ın resmi test reklam birimi ID'leri kullanılır. Gerçek App ID ve birim ID'leri `local.properties`'ten (`admob.appId`, `admob.bannerUnitId`) okunup yalnız release derlemesine manifest placeholder / `BuildConfig` ile verilir; repoya girmez. Anahtarlar yoksa release de test kimlikleriyle derlenir, yayından önce mutlaka girilmeli.
 - AB onay formunu denemek için `local.properties`'e `ump.testDeviceHash=<logcat'teki cihaz kimliği>` eklenir; yalnız debug'da etkilidir, denemeden sonra silinir.
 - Kendi gerçek reklamına tıklamak AdMob hesabını riske atar; geliştirmede her zaman test ID.
-
-**"Reklamları kaldır"**
-
-- Play Console'da tek ürün: `remove_ads`, tek seferlik (tüketilmeyen) uygulama içi ürün.
-- `PremiumRepository.isPremium: StateFlow<Boolean>`; açılışta ve `onResume`'da satın almalar sorgulanır.
-- Satın alma mutlaka onaylanır (acknowledge); onaylanmayan satın almaları Google birkaç gün içinde iade eder.
-- Sonuç `isPremiumCache`'e yazılır, çevrimdışı açılışta banner gizli kalır.
-
-**Faz sırası için not**: Faz 1–7 boyunca `NoOpAdsController` ve `FakePremiumRepository` kullanılır. Böylece AdMob ve Billing kurulmadan uygulama eksiksiz çalışır.
 
 **Kod dışında, AdMob konsolunda**: kumar, alkol ve flört gibi hassas kategorileri engelle. Uygulama "çocuklara yönelik değil" olarak işaretlenir.
 
@@ -283,8 +271,8 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
     - Kabul: her ayar uygulama yeniden açılınca korunur; ayar kapalıyken ses tuşları sesi değiştirir.
 8. **Reklam**: UMP ve AdMob banner (test ID'leri), gerçek `AdMobAdsController`.
     - Kabul: banner yalnız Geçmiş ve Ayarlar'da görünür; Tesbih ve Zikirler ekranında hiç reklam isteği yapılmaz.
-9. **Satın alma**: Play Billing, `remove_ads`, onaylama, banner'ın gizlenmesi.
-    - Kabul: lisans test hesabıyla satın alınınca banner kaybolur ve yeniden açılışta gizli kalır.
+9. **Satın alma kaldırıldı**: Uygulama ücretsizdir, hayır için yapılıyor. Play Billing ve `remove_ads` yoktur, `core/billing` silindi.
+    - Kabul: kodda ve manifestte satın alma kütüphanesi ya da izni yoktur.
 10. **Yayın hazırlığı**: uygulama ikonu, release build type, R8 ve keep kuralları, sürüm kodu, gizlilik politikası metni taslağı. Şablondaki `packageScope` satırı release derlemeyi açılışta `IllegalAccessError` ile çökertiyor; satır kaldırılınca uygulama açılıyor, burada çözülür.
     - Kabul: `./gradlew bundleRelease` imzasız da olsa hatasız tamamlanır; release APK'da sayım ve reklam çalışır.
 
@@ -301,7 +289,7 @@ Bu bölüm Claude Code'a doğrudan talimattır; dosya proje kökünde `CLAUDE.md
 - Kullanıcıya görünen her metin `strings.xml`'de (`values/` İngilizce, `values-tr/` Türkçe). Dini metinler yalnızca `PresetContent.kt`'de durur; yeni dini metin ekleme, mevcutları değiştirme.
 - Dini konularda (metin, sayı, sıra, hüküm) tek ölçü Diyanet'tir: Din İşleri Yüksek Kurulu, Diyanet yayınları ve müftülükler. Başka kaynağa dayanma; Diyanet'te karşılığı yoksa sor.
 - Gerçek AdMob ID'leri, keystore ve imzalama bilgileri koda veya repoya girmez.
-- Hataları yutma; Room, DataStore, AdMob ve Billing hatalarını `Log` ile kaydet.
+- Hataları yutma; Room, DataStore ve AdMob hatalarını `Log` ile kaydet.
 - Her faz ayrı commit: `faz-3: sade sayaç ekranı` biçiminde.
 - **Commit'lere asla kendini ekleme.** Commit mesajlarına ve PR açıklamalarına `Co-Authored-By: Claude ...` satırı, "Generated with Claude Code" ibaresi ya da başka bir Claude/Anthropic atfı yazma. Commit'lerin tek yazarı git config'deki kullanıcıdır.
 - Bu dokümanla çelişen ya da belirsiz bir durumda tahmin etme, sor.
@@ -332,13 +320,13 @@ sed -i \
 
 ## Geleceğe hazırlık
 
-Müezzin modu, saat uygulaması ve ücretli tesbih modelleri için MVP'de ek kod yazılmaz; yalnızca üç kural korunur: dini metinler tek yerde, sayma mantığı Android'den bağımsız, boncuk görünümü veri olarak.
+Müezzin modu, saat uygulaması ve yeni tesbih modelleri için MVP'de ek kod yazılmaz; yalnızca üç kural korunur: dini metinler tek yerde, sayma mantığı Android'den bağımsız, boncuk görünümü veri olarak.
 
 | Gelecek özellik | Nasıl eklenir | MVP'de bunun için yapılan |
 | --- | --- | --- |
 | Müezzin modu | Yeni `feature/muezzin` paketi: müezzinin yaptıklarını sırasıyla izletir, müezzinler ve müezzinliği öğrenenler aktif takip eder. Kamet metni büyük puntoyla, satır satır, tam ekran. İçerik Diyanet'e göre hazırlanır. 100'lük tesbih sayımından ayrı akıştır, sayıma adım eklenmez. Ekranı açık tutma ve karartma altyapısını kullanır. | Dini metinler `core/content`'te; ekranı açık tutma mantığı `core`'da |
 | Wear OS saat uygulaması | `core/domain` ve `core/content` ayrı bir `:core` modülüne taşınır; yeni `:wear` modülü (Compose for Wear OS) aynı `CounterEngine`'i kullanır. Telefonla eşitleme ayrı bir iş. | `core/domain`'de Android import'u yok |
-| Ücretli tesbih modelleri | `BeadStyle`'a `productId` eklenir; `PremiumRepository` birden çok ürünü tanır. | Boncuk görünümü `BeadStyle` verisi |
+| Yeni tesbih modelleri | Modeller `BeadStyles` listesine eklenir. Uygulama ücretsiz kaldığı için satın alma yoktur; modeller reklamla alınır (ödüllü reklam, yalnız ibadet dışı ekranlarda). Ayrıntı modeller eklenirken netleşir. | Boncuk görünümü `BeadStyle` verisi |
 | Hilt'e geçiş | Modül sayısı üçü geçince `AppContainer` Hilt modüllerine bölünür. | Tüm bağımlılıklar tek `AppContainer`'da |
 
 ## Yayın öncesi kontrol listesi
@@ -349,7 +337,6 @@ Bunlar kod dışı işlerdir ve senin yapman gerekir; hedef, Ramazan'dan önce s
 - [ ] Hazır zikir metinleri Diyanet kaynaklarından kontrol edildi
 - [ ] AdMob: gerçek ID'ler yalnız release derlemesinde; hassas kategoriler engellendi
 - [ ] UMP onay formu AB bölgesi simülasyonuyla (debug geography) test edildi
-- [ ] `remove_ads` ürünü Play Console'da oluşturuldu; lisans test hesabıyla satın alma denendi
 - [ ] Gizlilik politikası sayfası yayında (reklam kimliği kullanımı belirtildi)
 - [ ] Data safety formu reklam SDK'sının topladığı verilere göre dolduruldu
 - [ ] Hedef kitle: çocuklara yönelik değil; içerik derecelendirme anketi tamamlandı
