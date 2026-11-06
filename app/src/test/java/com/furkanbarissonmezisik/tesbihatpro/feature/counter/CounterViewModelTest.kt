@@ -3,17 +3,22 @@ package com.furkanbarissonmezisik.tesbihatpro.feature.counter
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SettingsRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEffect
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.AppSettings
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.CounterState
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.TesbihatStep
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.ZikirDraft
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.HapticsController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundController
+import com.furkanbarissonmezisik.tesbihatpro.core.input.VolumeKeyDispatcher
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeContentVersionStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeDailyCountDao
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeSessionStore
+import com.furkanbarissonmezisik.tesbihatpro.testing.FakeSettingsStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeZikirDao
+import android.view.KeyEvent
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +45,8 @@ class CounterViewModelTest {
     private val store = FakeSessionStore()
     private val dao = FakeZikirDao()
     private val dailyDao = FakeDailyCountDao()
+    private val settingsStore = FakeSettingsStore()
+    private val volumeKeys = VolumeKeyDispatcher()
     private val day = "2027-02-08"
     private val haptics = RecordingHaptics()
     private val sound = RecordingSound()
@@ -73,6 +80,8 @@ class CounterViewModelTest {
         sessionRepository = sessionRepository(),
         zikirRepository = ZikirRepository(dao, FakeContentVersionStore(), backgroundScope),
         historyRepository = historyRepository(),
+        settingsRepository = SettingsRepository(settingsStore, backgroundScope),
+        volumeKeys = volumeKeys,
         haptics = haptics,
         sound = sound,
     )
@@ -347,6 +356,8 @@ class CounterViewModelTest {
             sessionRepository = session,
             zikirRepository = ownZikirRepository(),
             historyRepository = historyRepository(),
+            settingsRepository = SettingsRepository(settingsStore, backgroundScope),
+            volumeKeys = volumeKeys,
             haptics = haptics,
             sound = sound,
         )
@@ -531,7 +542,103 @@ class CounterViewModelTest {
         assertEquals(null, dailyDao.count(day, PresetContent.SALAVAT_ID))
     }
 
+
+    @Test
+    fun `sound off silences taps but keeps vibration`() = runTest(mainDispatcher) {
+        settingsStore.update { it.copy(soundEnabled = false) }
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onTap()
+
+        assertTrue(sound.effects.isEmpty())
+        assertEquals(1, haptics.effects.size)
+    }
+
+    @Test
+    fun `vibration off keeps sound`() = runTest(mainDispatcher) {
+        settingsStore.update { it.copy(hapticsEnabled = false) }
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onTap()
+
+        assertTrue(haptics.effects.isEmpty())
+        assertEquals(1, sound.effects.size)
+    }
+
+    @Test
+    fun `counting goes on with both turned off`() = runTest(mainDispatcher) {
+        settingsStore.update { it.copy(soundEnabled = false, hapticsEnabled = false) }
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onTap()
+
+        assertEquals(1, viewModel.ready().count)
+    }
+
+    @Test
+    fun `setting changes apply to the next tap without restarting`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel()
+        runCurrent()
+        viewModel.onTap()
+
+        settingsStore.update { it.copy(soundEnabled = false) }
+        runCurrent()
+        viewModel.onTap()
+
+        assertEquals(1, sound.effects.size)
+        assertEquals(2, haptics.effects.size)
+    }
+
+    @Test
+    fun `volume up counts and volume down undoes once attached`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel()
+        runCurrent()
+        viewModel.attachVolumeKeys()
+
+        repeat(3) {
+            volumeKeys.onKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.ACTION_DOWN, repeatCount = 0)
+        }
+        volumeKeys.onKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.ACTION_DOWN, repeatCount = 0)
+
+        assertEquals(2, viewModel.ready().count)
+    }
+
+    @Test
+    fun `detached counter leaves volume keys to the system`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel()
+        runCurrent()
+        viewModel.attachVolumeKeys()
+        viewModel.detachVolumeKeys()
+
+        val consumed = volumeKeys.onKeyEvent(
+            KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.ACTION_DOWN,
+            repeatCount = 0,
+        )
+
+        assertFalse(consumed)
+        assertEquals(0, viewModel.ready().count)
+    }
+
+    @Test
+    fun `settings reach the screen`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel()
+        runCurrent()
+
+        settingsStore.update { it.copy(keepScreenOn = false, beadStyleId = "dark_wood") }
+        runCurrent()
+
+        assertEquals(
+            AppSettings(keepScreenOn = false, beadStyleId = "dark_wood"),
+            viewModel.settings.value,
+        )
+    }
+
     private class RecordingHaptics : HapticsController {
+
 
 
         val effects = mutableListOf<CounterEffect>()

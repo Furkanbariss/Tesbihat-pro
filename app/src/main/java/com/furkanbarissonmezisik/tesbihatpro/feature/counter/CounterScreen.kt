@@ -1,5 +1,6 @@
 package com.furkanbarissonmezisik.tesbihatpro.feature.counter
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.furkanbarissonmezisik.tesbihatpro.R
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.BeadStyle
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.BeadStyles
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.DimWindowEffect
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.components.KeepScreenOnEffect
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.displayTransliteration
 
 /** Bu yüksekliğin altında (yatay telefon) metin ve sayı yan yana dizilir. */
@@ -72,26 +77,49 @@ fun CounterRoute(
     viewModel: CounterViewModel = viewModel(factory = CounterViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    CounterScreen(
-        uiState = uiState,
-        onTap = viewModel::onTap,
-        onUndo = viewModel::onUndo,
-        onResetStep = viewModel::onResetStep,
-        onResetAll = viewModel::onResetAll,
-        onOpenZikirs = onOpenZikirs,
-        onOpenHistory = onOpenHistory,
-        onOpenSettings = onOpenSettings,
-    )
+    val settings by viewModel.settings.collectAsState()
+    var dimmed by rememberSaveable { mutableStateOf(false) }
+
+    // Karartma ayardan bağımsız olarak ekranı açık tutar; kapanırsa sayım yarıda kalır.
+    KeepScreenOnEffect(enabled = settings.keepScreenOn || dimmed)
+    DisposableEffect(viewModel, settings.volumeKeysEnabled) {
+        if (settings.volumeKeysEnabled) viewModel.attachVolumeKeys()
+        onDispose { viewModel.detachVolumeKeys() }
+    }
+    if (dimmed) {
+        DimWindowEffect()
+        BackHandler { dimmed = false }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        CounterScreen(
+            uiState = uiState,
+            beadStyle = BeadStyles.find(settings.beadStyleId),
+            onTap = viewModel::onTap,
+            onUndo = viewModel::onUndo,
+            onResetStep = viewModel::onResetStep,
+            onResetAll = viewModel::onResetAll,
+            onDim = { dimmed = true },
+            onOpenZikirs = onOpenZikirs,
+            onOpenHistory = onOpenHistory,
+            onOpenSettings = onOpenSettings,
+        )
+        if (dimmed) {
+            DimOverlay(onTap = viewModel::onTap, onExit = { dimmed = false })
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CounterScreen(
     uiState: CounterUiState,
+    beadStyle: BeadStyle,
     onTap: () -> Unit,
     onUndo: () -> Unit,
     onResetStep: () -> Unit,
     onResetAll: () -> Unit,
+    onDim: () -> Unit,
     onOpenZikirs: () -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -131,10 +159,12 @@ fun CounterScreen(
             if (uiState is CounterUiState.Ready) {
                 CounterContent(
                     state = uiState,
+                    beadStyle = beadStyle,
                     onTap = onTap,
                     onUndo = onUndo,
                     onResetStep = onResetStep,
                     onResetAll = onResetAll,
+                    onDim = onDim,
                 )
             }
         }
@@ -144,10 +174,12 @@ fun CounterScreen(
 @Composable
 private fun CounterContent(
     state: CounterUiState.Ready,
+    beadStyle: BeadStyle,
     onTap: () -> Unit,
     onUndo: () -> Unit,
     onResetStep: () -> Unit,
     onResetAll: () -> Unit,
+    onDim: () -> Unit,
 ) {
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -165,7 +197,7 @@ private fun CounterContent(
             position = state.beadPosition,
             imames = state.imames,
             lastBead = state.lastBead,
-            style = BeadStyles.default,
+            style = beadStyle,
             spacing = beadSpacing,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -218,6 +250,12 @@ private fun CounterContent(
                     Icon(
                         painter = painterResource(R.drawable.ic_undo),
                         contentDescription = stringResource(R.string.action_undo),
+                    )
+                }
+                FilledTonalIconButton(onClick = onDim) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_dim),
+                        contentDescription = stringResource(R.string.action_dim),
                     )
                 }
                 FilledTonalIconButton(onClick = { showResetDialog = true }) {

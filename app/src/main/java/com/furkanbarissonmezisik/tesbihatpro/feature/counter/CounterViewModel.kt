@@ -10,15 +10,18 @@ import com.furkanbarissonmezisik.tesbihatpro.TesbihApp
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SettingsRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEngine
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEvent
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.countDelta
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.AppSettings
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.CounterState
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.TesbihatStep
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.Zikir
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.HapticsController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundController
+import com.furkanbarissonmezisik.tesbihatpro.core.input.VolumeKeyDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,9 +50,13 @@ class CounterViewModel(
     private val sessionRepository: SessionRepository,
     private val zikirRepository: ZikirRepository,
     private val historyRepository: HistoryRepository,
+    private val settingsRepository: SettingsRepository,
+    private val volumeKeys: VolumeKeyDispatcher,
     private val haptics: HapticsController,
     private val sound: SoundController,
-) : ViewModel() {
+) : ViewModel(), VolumeKeyDispatcher.Listener {
+
+    val settings: StateFlow<AppSettings> = settingsRepository.settings
 
     /** Veritabanı okunamasa da hazır zikirlerle sayım sürer. */
     private var zikirsById: Map<Long, Zikir> = PresetContent.zikirs.associateBy { it.id }
@@ -78,12 +85,21 @@ class CounterViewModel(
 
     fun onResetAll() = dispatch(CounterEvent.ResetAll)
 
+    override fun onVolumeUp() = onTap()
+
+    override fun onVolumeDown() = onUndo()
+
+    fun attachVolumeKeys() = volumeKeys.register(this)
+
+    fun detachVolumeKeys() = volumeKeys.unregister(this)
+
     private fun dispatch(event: CounterEvent) {
         val current = counterState ?: return
         val transition = CounterEngine.reduce(current, event)
         transition.effect?.let { effect ->
-            haptics.perform(effect)
-            sound.play(effect)
+            val settings = settingsRepository.settings.value
+            if (settings.hapticsEnabled) haptics.perform(effect)
+            if (settings.soundEnabled) sound.play(effect)
         }
         if (transition.state != current) {
             show(transition.state)
@@ -147,6 +163,8 @@ class CounterViewModel(
                     sessionRepository = container.sessionRepository,
                     zikirRepository = container.zikirRepository,
                     historyRepository = container.historyRepository,
+                    settingsRepository = container.settingsRepository,
+                    volumeKeys = container.volumeKeyDispatcher,
                     haptics = container.hapticsController,
                     sound = container.soundController,
                 )

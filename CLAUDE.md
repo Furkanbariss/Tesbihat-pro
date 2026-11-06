@@ -197,7 +197,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 | Tesbih (başlangıç) | Boncuklar, büyük sayı, adımın Arapçası ve okunuşu, adım göstergesi (1/3), geri al, sıfırla, karartma düğmesi | Yok |
 | Zikirler | En üstte "Namaz sonrası tesbihat", altında hazır ve kendi zikirlerin; ekle, düzenle, sil (hazırlar hariç) | Yok |
 | Geçmiş | Bugünün özeti, son 30 gün, gün başına zikir toplamları | Banner |
-| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, reklamları kaldır, gizlilik seçenekleri, hakkında | Banner |
+| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, reklamları kaldır, gizlilik seçenekleri, hakkında | Banner |
 
 **Tesbih boncukları (`TesbihBeads`)**
 
@@ -206,7 +206,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 - Hızlı dokunuşlarda animasyon kuyruğa girmez, doğrudan hedef konuma atlar; sayı hiçbir zaman animasyonu beklemez.
 - Aşağı sürükleme bir boncuk aralığını geçince `Tap` sayılır.
 - Adım hedefinde dizide daha büyük ve farklı biçimli imame boncuğu görünür.
-- Görünüm veriyle tanımlanır: `BeadStyle(id, baseColor, highlightColor, threadColor)`. MVP'de 2 ücretsiz stil (kehribar, koyu ahşap); gelecekteki ücretli modeller bu yapıya eklenir.
+- Görünüm veriyle tanımlanır: `BeadStyle(id, nameRes, baseColor, highlightColor, threadColor)`. MVP'de 2 ücretsiz stil (kehribar, koyu ahşap); gelecekteki ücretli modeller bu yapıya eklenir.
 
 **Geri bildirim**
 
@@ -224,8 +224,8 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 
 **Ekranı açık tutma ve karartma**
 
-- `keepScreenOn` açıkken yalnızca Tesbih ekranında `FLAG_KEEP_SCREEN_ON` uygulanır.
-- Karartma modu: tam ekran siyah katman + pencere parlaklığı 0.01. Dokunma ve ses tuşları saymaya devam eder; çıkış 1 saniyelik uzun basmayla yapılır.
+- `keepScreenOn` açıkken yalnızca Tesbih ekranında `FLAG_KEEP_SCREEN_ON` uygulanır. Bayrak doğrudan pencereye yazılır; `View.keepScreenOn` durgun ekranda kalkmayabilir.
+- Karartma modu: tam ekran siyah katman + pencere parlaklığı 0.01. Dokunma ve ses tuşları saymaya devam eder; çıkış 1 saniyelik uzun basmayla yapılır. Dokunuş burada parmak kalkınca sayılır, çıkış için yapılan uzun basış sayılmaz. `keepScreenOn` kapalı olsa da ekran açık kalır. Sistem çubukları gizlenmez: gizlemek Android'in "tam ekran" uyarısını açar ve ilk dokunuşu yutar.
 
 **Dil ve erişilebilirlik**
 
