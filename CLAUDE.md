@@ -59,7 +59,7 @@ Tek `app` modülü, özellik bazlı paketler; `core/domain` ve `core/content` An
 Dokunuş ekrana ve titreşime aynı karede yansır; diske yazma 300 ms gecikmeyle arka planda yapılır, bu yüzden hızlı sayımda takılma olmaz.
 
 ```
-app/src/main/java/com/<senin-adin>/tesbih/
+app/src/main/java/com/furkanbarissonmezisik/tesbihatpro/
 ├── TesbihApp.kt              // Application; AppContainer'ı kurar
 ├── MainActivity.kt           // tek Activity; ses tuşlarını yönlendirir
 ├── di/

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Tesbihat Pro</string>
+    <string name="screen_zikirs">Dhikrs</string>
+    <string name="screen_history">History</string>
+    <string name="screen_settings">Settings</string>
+    <string name="action_back">Back</string>
 </resources>
