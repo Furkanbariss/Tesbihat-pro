@@ -3,4 +3,15 @@
     <string name="screen_history">Geçmiş</string>
     <string name="screen_settings">Ayarlar</string>
     <string name="action_back">Geri</string>
+    <string name="action_undo">Geri al</string>
+    <string name="action_reset">Sıfırla</string>
+    <string name="action_restart">Yeniden başla</string>
+    <string name="action_cancel">Vazgeç</string>
+    <string name="counter_tap_label">Say</string>
+    <string name="counter_completed">Tamamlandı</string>
+    <string name="counter_completed_tesbihat">Tesbihat tamamlandı</string>
+    <string name="reset_dialog_title">Sayım sıfırlansın mı?</string>
+    <string name="reset_dialog_message">Günlük geçmişin etkilenmez.</string>
+    <string name="reset_dialog_step">Bu adımı sıfırla</string>
+    <string name="reset_dialog_all">Baştan başla</string>
 </resources>

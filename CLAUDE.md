@@ -180,8 +180,8 @@ Hazır zikirler ilk açılışta `PresetContent`'ten yüklenir. DataStore'daki `
 **Sayımı kaybetmeme kuralı**
 
 1. Sayım durumu bellekte, ViewModel'dedir; ekran anında güncellenir.
-2. Her `Tap` / `Undo` sonrası `SessionStore` yazımı 300 ms debounce ile yapılır.
-3. Günlük toplam bellekte delta olarak birikir; 300 ms debounce ile `count = count + delta` upsert edilir. `Undo` deltayı azaltır, toplam 0'ın altına inmez.
+2. Her `Tap` / `Undo` sonrası `SessionStore` yazımı en geç 300 ms içinde yapılır. Gecikme her dokunuşta yeniden başlamaz; yeniden başlasaydı kesintisiz hızlı sayımda hiç yazım olmaz, çökmede tüm seri kaybolurdu.
+3. Günlük toplam bellekte delta olarak birikir; aynı kuralla, en geç 300 ms içinde `count = count + delta` upsert edilir. `Undo` deltayı azaltır, toplam 0'ın altına inmez.
 4. Uygulama arka plana geçince (`ProcessLifecycleOwner` ON\_STOP) bekleyen yazımlar anında yapılır.
 5. Açılışta oturum `SessionStore`'dan geri yüklenir.
 6. Tarih her yazımda `LocalDate.now()` ile hesaplanır; gece yarısını geçen oturum yeni güne yazılır.
@@ -274,7 +274,7 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
     - Kabul: saniyede 8 dokunuşta sayı ve boncuk konumu tutarlı, belirgin takılma yok.
 5. **Zikirler**: Room, hazır içerik yükleme, liste, ekle/düzenle/sil, seçilen zikri veya tesbihatı sayaçta açma.
     - Kabul: tesbihat 33-33-33-1 adımlarıyla baştan sona çalışır; kendi zikrim kaydedilip sayılır.
-6. **Geçmiş**: `daily_counts`, debounce'lu yazım, son 30 gün ekranı.
+6. **Geçmiş**: `daily_counts`, gecikmeli yazım, son 30 gün ekranı.
     - Kabul: sayılanlar Geçmiş'te doğru toplamla görünür; Undo toplamı düşürür.
 7. **Ayarlar ve girdi**: `SettingsStore`, ses tuşları, ekranı açık tut, karartma modu, tema.
     - Kabul: her ayar uygulama yeniden açılınca korunur; ayar kapalıyken ses tuşları sesi değiştirir.

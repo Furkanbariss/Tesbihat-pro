@@ -1,6 +1,9 @@
 package com.furkanbarissonmezisik.tesbihatpro
 
 import android.app.Application
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.furkanbarissonmezisik.tesbihatpro.di.AppContainer
 
 class TesbihApp : Application() {
@@ -9,6 +12,13 @@ class TesbihApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        container = AppContainer()
+        container = AppContainer(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStop(owner: LifecycleOwner) {
+                    container.flushPendingWrites()
+                }
+            },
+        )
     }
 }
