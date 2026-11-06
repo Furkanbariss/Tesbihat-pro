@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -32,8 +34,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -43,15 +47,22 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.furkanbarissonmezisik.tesbihatpro.R
+import com.furkanbarissonmezisik.tesbihatpro.core.ui.BeadStyles
 import com.furkanbarissonmezisik.tesbihatpro.core.ui.displayTransliteration
 
 /** Bu yüksekliğin altında (yatay telefon) metin ve sayı yan yana dizilir. */
 private val COMPACT_HEIGHT = 480.dp
+
+private const val VISIBLE_BEADS = 9
+private val MIN_BEAD_SPACING = 32.dp
+private val MAX_BEAD_SPACING = 84.dp
 
 @Composable
 fun CounterRoute(
@@ -143,11 +154,33 @@ private fun CounterContent(
     // Düğmeler dokunma katmanının kardeşi olarak üstte durur, böylece sayıma karışmaz.
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val compact = maxHeight < COMPACT_HEIGHT
-        TapArea(onTap = onTap, modifier = Modifier.matchParentSize())
+        val beadSpacing = (maxHeight / VISIBLE_BEADS).coerceIn(MIN_BEAD_SPACING, MAX_BEAD_SPACING)
+        val beadStripWidth = beadSpacing * 1.35f
+        TapArea(
+            beadSpacing = beadSpacing,
+            onTap = onTap,
+            modifier = Modifier.matchParentSize(),
+        )
+        TesbihBeads(
+            position = state.beadPosition,
+            imames = state.imames,
+            lastBead = state.lastBead,
+            style = BeadStyles.default,
+            spacing = beadSpacing,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(beadStripWidth)
+                .fillMaxHeight(),
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = if (compact) 8.dp else 16.dp),
+                .padding(
+                    start = 24.dp,
+                    end = beadStripWidth + 8.dp,
+                    top = if (compact) 8.dp else 16.dp,
+                    bottom = if (compact) 8.dp else 16.dp,
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (state.stepCount > 1) {
@@ -213,18 +246,35 @@ private fun CounterContent(
     }
 }
 
-/** Her parmak inişi bir sayımdır; iki başparmakla sırayla basmak da sayılır. */
+/**
+ * Her parmak inişi hemen bir sayımdır, dokunuş parmak kalkmasını beklemez; iki başparmakla sırayla
+ * basmak da sayılır. Aşağı sürükleme [BeadDrag] ile sayım ekler.
+ */
 @Composable
-private fun TapArea(onTap: () -> Unit, modifier: Modifier = Modifier) {
+private fun TapArea(beadSpacing: Dp, onTap: () -> Unit, modifier: Modifier = Modifier) {
     val currentOnTap by rememberUpdatedState(onTap)
     val label = stringResource(R.string.counter_tap_label)
+    val spacingPx = with(LocalDensity.current) { beadSpacing.toPx() }
     Box(
         modifier = modifier
-            .pointerInput(Unit) {
+            .pointerInput(spacingPx) {
+                val drags = mutableMapOf<PointerId, BeadDrag>()
                 awaitPointerEventScope {
                     while (true) {
                         awaitPointerEvent().changes.forEach { change ->
-                            if (change.changedToDown()) currentOnTap()
+                            when {
+                                change.changedToDown() -> {
+                                    drags[change.id] = BeadDrag(change.position.y)
+                                    currentOnTap()
+                                }
+                                change.pressed -> {
+                                    val newTaps = drags[change.id]
+                                        ?.advance(change.position.y, spacingPx)
+                                        ?: 0
+                                    repeat(newTaps) { currentOnTap() }
+                                }
+                                else -> drags.remove(change.id)
+                            }
                         }
                     }
                 }
@@ -328,6 +378,11 @@ private fun CountLines(count: Int, target: Int?, fontSize: TextUnit) {
             ),
             color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 36.sp,
+                maxFontSize = fontSize,
+                stepSize = 12.sp,
+            ),
         )
         if (target != null) {
             Text(

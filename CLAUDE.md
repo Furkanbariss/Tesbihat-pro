@@ -18,7 +18,7 @@ MVP, namaz sonrası tesbihatı ve serbest zikri dokunarak, titreşimle ve ses tu
 
 **Bilerek dışarıda bırakılanlar (sonraki sürümler)**
 
-- Müezzin / kamet modu
+- Müezzin modu: müezzinin yaptıklarını adım adım izleten, müezzinlerin ve müezzinliği öğrenenlerin takip edeceği ayrı mod
 - Wear OS saat uygulaması ve ana ekran widget'ı
 - Ücretli tesbih modelleri (kehribar, oltu taşı vb.); boncuk görünümü yine de şimdiden veri olarak tanımlanır
 - Hesap, bulut eşitleme, namaz vakitleri, hatırlatıcı bildirimler
@@ -282,7 +282,7 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
     - Kabul: banner yalnız Geçmiş ve Ayarlar'da görünür; Tesbih ve Zikirler ekranında hiç reklam isteği yapılmaz.
 9. **Satın alma**: Play Billing, `remove_ads`, onaylama, banner'ın gizlenmesi.
     - Kabul: lisans test hesabıyla satın alınınca banner kaybolur ve yeniden açılışta gizli kalır.
-10. **Yayın hazırlığı**: uygulama ikonu, release build type, R8 ve keep kuralları, sürüm kodu, gizlilik politikası metni taslağı.
+10. **Yayın hazırlığı**: uygulama ikonu, release build type, R8 ve keep kuralları, sürüm kodu, gizlilik politikası metni taslağı. Şablondaki `packageScope` satırı release derlemeyi açılışta `IllegalAccessError` ile çökertiyor; satır kaldırılınca uygulama açılıyor, burada çözülür.
     - Kabul: `./gradlew bundleRelease` imzasız da olsa hatasız tamamlanır; release APK'da sayım ve reklam çalışır.
 
 ## Claude Code çalışma kuralları
@@ -332,7 +332,7 @@ Müezzin modu, saat uygulaması ve ücretli tesbih modelleri için MVP'de ek kod
 
 | Gelecek özellik | Nasıl eklenir | MVP'de bunun için yapılan |
 | --- | --- | --- |
-| Müezzin / kamet modu | Yeni `feature/kamet` paketi: kamet metni büyük puntoyla, satır satır, tam ekran. Ekranı açık tutma ve karartma altyapısını kullanır. | Dini metinler `core/content`'te; ekranı açık tutma mantığı `core`'da |
+| Müezzin modu | Yeni `feature/muezzin` paketi: müezzinin yaptıklarını sırasıyla izletir, müezzinler ve müezzinliği öğrenenler aktif takip eder. Kamet metni büyük puntoyla, satır satır, tam ekran. İçerik Diyanet'e göre hazırlanır. 100'lük tesbih sayımından ayrı akıştır, sayıma adım eklenmez. Ekranı açık tutma ve karartma altyapısını kullanır. | Dini metinler `core/content`'te; ekranı açık tutma mantığı `core`'da |
 | Wear OS saat uygulaması | `core/domain` ve `core/content` ayrı bir `:core` modülüne taşınır; yeni `:wear` modülü (Compose for Wear OS) aynı `CounterEngine`'i kullanır. Telefonla eşitleme ayrı bir iş. | `core/domain`'de Android import'u yok |
 | Ücretli tesbih modelleri | `BeadStyle`'a `productId` eklenir; `PremiumRepository` birden çok ürünü tanır. | Boncuk görünümü `BeadStyle` verisi |
 | Hilt'e geçiş | Modül sayısı üçü geçince `AppContainer` Hilt modüllerine bölünür. | Tüm bağımlılıklar tek `AppContainer`'da |

@@ -141,6 +141,31 @@ class CounterViewModelTest {
     }
 
     @Test
+    fun `bead position keeps moving forward across a step change`() = runTest(mainDispatcher) {
+        store.stored = CounterState(PresetContent.defaultTesbihat, count = 32)
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+        assertEquals(32, viewModel.ready().beadPosition)
+
+        viewModel.onTap()
+
+        assertEquals(33, viewModel.ready().beadPosition)
+        assertEquals(listOf(33, 66, 99, 100), viewModel.ready().imames)
+        assertEquals(100, viewModel.ready().lastBead)
+    }
+
+    @Test
+    fun `undo at a step boundary moves the beads back by one`() = runTest(mainDispatcher) {
+        store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 1)
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onUndo()
+
+        assertEquals(32, viewModel.ready().beadPosition)
+    }
+
+    @Test
     fun `tesbihat ends on the tehlil step`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 3)
         val viewModel = createViewModel()

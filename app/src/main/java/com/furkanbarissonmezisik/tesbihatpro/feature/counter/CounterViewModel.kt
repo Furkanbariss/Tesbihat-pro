@@ -31,6 +31,9 @@ sealed interface CounterUiState {
         val stepNumber: Int,
         val stepCount: Int,
         val completed: Boolean,
+        val beadPosition: Int,
+        val imames: List<Int>,
+        val lastBead: Int?,
     ) : CounterUiState
 }
 
@@ -88,6 +91,9 @@ class CounterViewModel(
             stepNumber = state.stepIndex + 1,
             stepCount = state.steps.size,
             completed = state.completed,
+            beadPosition = beadPosition(state),
+            imames = imameBeads(state.steps),
+            lastBead = lastBead(state.steps),
         )
     }
 
