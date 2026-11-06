@@ -1,0 +1,80 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "678252f8dea26101ff07f5671e99827b",
+    "entities": [
+      {
+        "tableName": "zikirs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `arabic` TEXT, `translit_tr` TEXT NOT NULL, `translit_en` TEXT, `meaning_tr` TEXT, `meaning_en` TEXT, `default_target` INTEGER, `is_preset` INTEGER NOT NULL, `sort_order` INTEGER NOT NULL, `created_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arabic",
+            "columnName": "arabic",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "transliterationTr",
+            "columnName": "translit_tr",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transliterationEn",
+            "columnName": "translit_en",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "meaningTr",
+            "columnName": "meaning_tr",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "meaningEn",
+            "columnName": "meaning_en",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "defaultTarget",
+            "columnName": "default_target",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isPreset",
+            "columnName": "is_preset",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sort_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '678252f8dea26101ff07f5671e99827b')"
+    ]
+  }
+}

@@ -9,15 +9,19 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.furkanbarissonmezisik.tesbihatpro.TesbihApp
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEngine
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEvent
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.CounterState
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.TesbihatStep
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.Zikir
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.HapticsController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 sealed interface CounterUiState {
@@ -39,11 +43,13 @@ sealed interface CounterUiState {
 
 class CounterViewModel(
     private val sessionRepository: SessionRepository,
+    private val zikirRepository: ZikirRepository,
     private val haptics: HapticsController,
     private val sound: SoundController,
 ) : ViewModel() {
 
-    private val zikirsById = PresetContent.zikirs.associateBy { it.id }
+    /** Veritabanı okunamasa da hazır zikirlerle sayım sürer. */
+    private var zikirsById: Map<Long, Zikir> = PresetContent.zikirs.associateBy { it.id }
 
     private val _uiState = MutableStateFlow<CounterUiState>(CounterUiState.Loading)
     val uiState: StateFlow<CounterUiState> = _uiState.asStateFlow()
@@ -53,10 +59,11 @@ class CounterViewModel(
 
     init {
         viewModelScope.launch {
-            val restored = sessionRepository.load()?.takeIf { state ->
-                state.steps.all { it.zikirId in zikirsById }
-            }
+            rememberZikirs(zikirRepository.zikirs.first())
+            val restored = sessionRepository.load()?.takeIf { hasKnownZikirs(it.steps) }
             show(restored ?: CounterState(PresetContent.defaultTesbihat))
+            launch { zikirRepository.zikirs.collect(::onZikirsChanged) }
+            sessionRepository.requestedSteps.filterNotNull().collect { onStepsRequested(it) }
         }
     }
 
@@ -81,6 +88,35 @@ class CounterViewModel(
         }
     }
 
+    private fun rememberZikirs(zikirs: List<Zikir>) {
+        zikirsById = PresetContent.zikirs.associateBy { it.id } + zikirs.associateBy { it.id }
+    }
+
+    private fun hasKnownZikirs(steps: List<TesbihatStep>) = steps.all { it.zikirId in zikirsById }
+
+    private fun onZikirsChanged(zikirs: List<Zikir>) {
+        rememberZikirs(zikirs)
+        val current = counterState ?: return
+        if (hasKnownZikirs(current.steps)) {
+            show(current)
+        } else {
+            startSession(PresetContent.defaultTesbihat)
+        }
+    }
+
+    private suspend fun onStepsRequested(steps: List<TesbihatStep>) {
+        sessionRepository.clearRequestedSteps()
+        if (!hasKnownZikirs(steps)) rememberZikirs(zikirRepository.zikirs.first())
+        // Sürmekte olan zikir yeniden seçilirse sayım korunur.
+        if (hasKnownZikirs(steps) && steps != counterState?.steps) startSession(steps)
+    }
+
+    private fun startSession(steps: List<TesbihatStep>) {
+        val state = CounterState(steps)
+        show(state)
+        sessionRepository.save(state)
+    }
+
     private fun show(state: CounterState) {
         counterState = state
         val step = state.steps[state.stepIndex]
@@ -103,6 +139,7 @@ class CounterViewModel(
                 val container = (this[APPLICATION_KEY] as TesbihApp).container
                 CounterViewModel(
                     sessionRepository = container.sessionRepository,
+                    zikirRepository = container.zikirRepository,
                     haptics = container.hapticsController,
                     sound = container.soundController,
                 )

@@ -15,3 +15,9 @@ fun Zikir.displayTransliteration(): String =
     } else {
         transliterationEn ?: transliterationTr
     }
+
+/** Arayüz diline göre anlam; İngilizcesi olmayan zikirde Türkçe anlama düşer. */
+@Composable
+@ReadOnlyComposable
+fun Zikir.displayMeaning(): String? =
+    if (booleanResource(R.bool.prefer_turkish_zikir_text)) meaningTr else meaningEn ?: meaningTr

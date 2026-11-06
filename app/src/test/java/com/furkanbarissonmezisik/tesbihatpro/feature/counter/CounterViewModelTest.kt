@@ -2,19 +2,23 @@ package com.furkanbarissonmezisik.tesbihatpro.feature.counter
 
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SessionRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.engine.CounterEffect
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.CounterState
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.TesbihatStep
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.ZikirDraft
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.HapticsController
 import com.furkanbarissonmezisik.tesbihatpro.core.feedback.SoundController
+import com.furkanbarissonmezisik.tesbihatpro.testing.FakeContentVersionStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeSessionStore
+import com.furkanbarissonmezisik.tesbihatpro.testing.FakeZikirDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -31,6 +35,7 @@ class CounterViewModelTest {
 
     private val mainDispatcher: TestDispatcher = StandardTestDispatcher()
     private val store = FakeSessionStore()
+    private val dao = FakeZikirDao()
     private val haptics = RecordingHaptics()
     private val sound = RecordingSound()
 
@@ -40,8 +45,16 @@ class CounterViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
+    private lateinit var repository: SessionRepository
+
+    private fun TestScope.sessionRepository(): SessionRepository {
+        repository = SessionRepository(store, backgroundScope, mainDispatcher)
+        return repository
+    }
+
     private fun TestScope.createViewModel() = CounterViewModel(
-        sessionRepository = SessionRepository(store, backgroundScope, mainDispatcher),
+        sessionRepository = sessionRepository(),
+        zikirRepository = ZikirRepository(dao, FakeContentVersionStore(), backgroundScope),
         haptics = haptics,
         sound = sound,
     )
@@ -61,7 +74,7 @@ class CounterViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onTap()
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(5, viewModel.ready().count)
         assertTrue(haptics.effects.isEmpty())
@@ -70,7 +83,7 @@ class CounterViewModelTest {
     @Test
     fun `without a saved session the default tesbihat starts`() = runTest(mainDispatcher) {
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         val state = viewModel.ready()
         assertEquals(PresetContent.SUBHANALLAH_ID, state.zikir.id)
@@ -85,7 +98,7 @@ class CounterViewModelTest {
         store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 1, count = 12)
 
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         val state = viewModel.ready()
         assertEquals(PresetContent.ELHAMDULILLAH_ID, state.zikir.id)
@@ -99,7 +112,7 @@ class CounterViewModelTest {
             store.stored = CounterState(listOf(TesbihatStep(zikirId = 9999, target = 33)), count = 3)
 
             val viewModel = createViewModel()
-            advanceUntilIdle()
+            runCurrent()
 
             assertEquals(PresetContent.SUBHANALLAH_ID, viewModel.ready().zikir.id)
             assertEquals(0, viewModel.ready().count)
@@ -108,7 +121,7 @@ class CounterViewModelTest {
     @Test
     fun `tap updates the screen without waiting for the disk`() = runTest(mainDispatcher) {
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onTap()
 
@@ -119,7 +132,7 @@ class CounterViewModelTest {
     @Test
     fun `tap triggers haptics and sound with the engine effect`() = runTest(mainDispatcher) {
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onTap()
 
@@ -131,7 +144,7 @@ class CounterViewModelTest {
     fun `reaching a step target shows the next zikir`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, count = 32)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onTap()
 
@@ -144,7 +157,7 @@ class CounterViewModelTest {
     fun `bead position keeps moving forward across a step change`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, count = 32)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
         assertEquals(32, viewModel.ready().beadPosition)
 
         viewModel.onTap()
@@ -158,7 +171,7 @@ class CounterViewModelTest {
     fun `undo at a step boundary moves the beads back by one`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 1)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onUndo()
 
@@ -169,7 +182,7 @@ class CounterViewModelTest {
     fun `tesbihat ends on the tehlil step`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 3)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onTap()
 
@@ -187,10 +200,10 @@ class CounterViewModelTest {
             completed = true,
         )
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onTap()
-        advanceUntilIdle()
+        runCurrent()
 
         assertTrue(haptics.effects.isEmpty())
         assertTrue(sound.effects.isEmpty())
@@ -201,7 +214,7 @@ class CounterViewModelTest {
     fun `undo decrements without feedback`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, count = 5)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onUndo()
 
@@ -213,7 +226,7 @@ class CounterViewModelTest {
     fun `reset step clears only the current step`() = runTest(mainDispatcher) {
         store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 1, count = 5)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onResetStep()
 
@@ -230,7 +243,7 @@ class CounterViewModelTest {
             completed = true,
         )
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         viewModel.onResetAll()
 
@@ -242,7 +255,7 @@ class CounterViewModelTest {
     @Test
     fun `taps reach the store after the write delay`() = runTest(mainDispatcher) {
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        runCurrent()
 
         repeat(3) { viewModel.onTap() }
         advanceTimeBy(301)
@@ -252,7 +265,144 @@ class CounterViewModelTest {
         assertEquals(3, store.writes.single().count)
     }
 
+
+    private fun TestScope.ownZikirRepository() =
+        ZikirRepository(dao, FakeContentVersionStore(), backgroundScope)
+
+    @Test
+    fun `selected zikir starts a new session`() = runTest(mainDispatcher) {
+        store.stored = CounterState(PresetContent.defaultTesbihat, count = 5)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        repository.requestSteps(listOf(TesbihatStep(PresetContent.SALAVAT_ID, 100)))
+        runCurrent()
+
+        assertEquals(PresetContent.SALAVAT_ID, viewModel.ready().zikir.id)
+        assertEquals(0, viewModel.ready().count)
+        assertEquals(1, viewModel.ready().stepCount)
+    }
+
+    @Test
+    fun `request is cleared once the counter takes it`() = runTest(mainDispatcher) {
+        createViewModel()
+        runCurrent()
+
+        repository.requestSteps(listOf(TesbihatStep(PresetContent.SALAVAT_ID, 100)))
+        runCurrent()
+
+        assertEquals(null, repository.requestedSteps.value)
+    }
+
+    @Test
+    fun `selecting the running zikir keeps its count`() = runTest(mainDispatcher) {
+        val steps = listOf(TesbihatStep(PresetContent.SALAVAT_ID, 100))
+        store.stored = CounterState(steps, count = 40)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        repository.requestSteps(steps)
+        runCurrent()
+
+        assertEquals(40, viewModel.ready().count)
+    }
+
+    @Test
+    fun `selecting the tesbihat while it runs keeps its position`() = runTest(mainDispatcher) {
+        store.stored = CounterState(PresetContent.defaultTesbihat, stepIndex = 2, count = 7)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        repository.requestSteps(PresetContent.defaultTesbihat)
+        runCurrent()
+
+        assertEquals(3, viewModel.ready().stepNumber)
+        assertEquals(7, viewModel.ready().count)
+    }
+
+    @Test
+    fun `selection made before the counter exists is not lost`() = runTest(mainDispatcher) {
+        val session = sessionRepository()
+        session.requestSteps(listOf(TesbihatStep(PresetContent.SALAVAT_ID, 100)))
+
+        val viewModel = CounterViewModel(
+            sessionRepository = session,
+            zikirRepository = ownZikirRepository(),
+            haptics = haptics,
+            sound = sound,
+        )
+        runCurrent()
+
+        assertEquals(PresetContent.SALAVAT_ID, viewModel.ready().zikir.id)
+    }
+
+    @Test
+    fun `new session is written to the store`() = runTest(mainDispatcher) {
+        createViewModel()
+        runCurrent()
+
+        repository.requestSteps(listOf(TesbihatStep(PresetContent.SALAVAT_ID, 100)))
+        runCurrent()
+        advanceTimeBy(301)
+        runCurrent()
+
+        assertEquals(PresetContent.SALAVAT_ID, store.stored?.steps?.single()?.zikirId)
+    }
+
+    @Test
+    fun `users own zikir is counted and restored`() = runTest(mainDispatcher) {
+        val zikirs = ownZikirRepository()
+        zikirs.zikirs.first()
+        zikirs.add(ZikirDraft("Ya Latif", arabic = null, meaning = null, target = 129))
+        val id = zikirs.zikirs.first().last().id
+        store.stored = CounterState(listOf(TesbihatStep(id, 129)), count = 12)
+
+        val viewModel = createViewModel()
+        runCurrent()
+
+        assertEquals("Ya Latif", viewModel.ready().zikir.transliterationTr)
+        assertEquals(12, viewModel.ready().count)
+        assertEquals(129, viewModel.ready().target)
+    }
+
+    @Test
+    fun `editing the running zikir updates the screen and keeps the count`() =
+        runTest(mainDispatcher) {
+            val zikirs = ownZikirRepository()
+            zikirs.zikirs.first()
+            zikirs.add(ZikirDraft("Ya Latif", arabic = null, meaning = null, target = 129))
+            val id = zikirs.zikirs.first().last().id
+            store.stored = CounterState(listOf(TesbihatStep(id, 129)), count = 12)
+            val viewModel = createViewModel()
+            runCurrent()
+
+            zikirs.update(id, ZikirDraft("Ya Hafiz", arabic = null, meaning = null, target = 129))
+            runCurrent()
+
+            assertEquals("Ya Hafiz", viewModel.ready().zikir.transliterationTr)
+            assertEquals(12, viewModel.ready().count)
+        }
+
+    @Test
+    fun `deleting the running zikir returns to the default tesbihat`() = runTest(mainDispatcher) {
+        val zikirs = ownZikirRepository()
+        zikirs.zikirs.first()
+        zikirs.add(ZikirDraft("Ya Latif", arabic = null, meaning = null, target = 129))
+        val id = zikirs.zikirs.first().last().id
+        store.stored = CounterState(listOf(TesbihatStep(id, 129)), count = 12)
+        val viewModel = createViewModel()
+        runCurrent()
+
+        zikirs.delete(id)
+        runCurrent()
+
+        assertEquals(PresetContent.SUBHANALLAH_ID, viewModel.ready().zikir.id)
+        assertEquals(0, viewModel.ready().count)
+        assertEquals(4, viewModel.ready().stepCount)
+    }
+
     private class RecordingHaptics : HapticsController {
+
         val effects = mutableListOf<CounterEffect>()
 
         override fun perform(effect: CounterEffect) {

@@ -2,12 +2,16 @@ package com.furkanbarissonmezisik.tesbihatpro.core.data.repository
 
 import com.furkanbarissonmezisik.tesbihatpro.core.data.prefs.SessionStore
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.CounterState
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.TesbihatStep
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -27,6 +31,13 @@ class SessionRepository(
     private val pending = AtomicReference<CounterState?>(null)
     private val writeRequests = Channel<Unit>(Channel.CONFLATED)
     private val writeLock = Mutex()
+    private val _requestedSteps = MutableStateFlow<List<TesbihatStep>?>(null)
+
+    /**
+     * Zikirler ekranından seçilen ve sayacın henüz açmadığı adımlar. Değer tutulduğu için sayaç o
+     * anda ayakta olmasa da seçim kaybolmaz.
+     */
+    val requestedSteps: StateFlow<List<TesbihatStep>?> = _requestedSteps.asStateFlow()
 
     init {
         scope.launch {
@@ -37,7 +48,18 @@ class SessionRepository(
         }
     }
 
-    suspend fun load(): CounterState? = withContext(ioDispatcher) { store.read() }
+    suspend fun load(): CounterState? {
+        flush()
+        return withContext(ioDispatcher) { store.read() }
+    }
+
+    fun requestSteps(steps: List<TesbihatStep>) {
+        _requestedSteps.value = steps
+    }
+
+    fun clearRequestedSteps() {
+        _requestedSteps.value = null
+    }
 
     fun save(state: CounterState) {
         pending.set(state)

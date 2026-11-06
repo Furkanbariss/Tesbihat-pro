@@ -14,4 +14,20 @@
     <string name="reset_dialog_message">Günlük geçmişin etkilenmez.</string>
     <string name="reset_dialog_step">Bu adımı sıfırla</string>
     <string name="reset_dialog_all">Baştan başla</string>
+    <string name="zikirs_tesbihat_title">Namaz sonrası tesbihat</string>
+    <string name="zikirs_section_presets">Hazır zikirler</string>
+    <string name="zikirs_section_own">Zikirlerim</string>
+    <string name="zikirs_target_unlimited">Sınırsız</string>
+    <string name="zikirs_add">Zikir ekle</string>
+    <string name="zikirs_edit">Zikri düzenle</string>
+    <string name="zikirs_delete">Zikri sil</string>
+    <string name="zikirs_delete_title">Bu zikir silinsin mi?</string>
+    <string name="zikirs_delete_message">%1$s kaldırılacak. Geçmişteki sayımların Geçmiş ekranında kalır.</string>
+    <string name="zikirs_field_name">Ad</string>
+    <string name="zikirs_field_arabic">Arapça (isteğe bağlı)</string>
+    <string name="zikirs_field_meaning">Anlam (isteğe bağlı)</string>
+    <string name="zikirs_field_target">Hedef</string>
+    <string name="zikirs_field_target_hint">Sınırsız için boş bırak</string>
+    <string name="action_save">Kaydet</string>
+    <string name="action_delete">Sil</string>
 </resources>

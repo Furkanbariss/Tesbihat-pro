@@ -9,6 +9,9 @@ import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.Zikir
  * Id'ler sabittir ve oturum kayıtlarında saklanır; değiştirilmez. 1000 altı hazır zikirlere ayrılmıştır.
  */
 object PresetContent {
+    /** Hazır içerik değişince artırılır; açılışta veritabanı bu sürüme güncellenir. */
+    const val VERSION = 1
+
     const val SUBHANALLAH_ID = 1L
     const val ELHAMDULILLAH_ID = 2L
     const val ALLAHU_EKBER_ID = 3L

@@ -19,4 +19,20 @@
     <string name="reset_dialog_message">Your daily history is not affected.</string>
     <string name="reset_dialog_step">Reset this step</string>
     <string name="reset_dialog_all">Start over</string>
+    <string name="zikirs_tesbihat_title">Tesbihat after prayer</string>
+    <string name="zikirs_section_presets">Preset dhikrs</string>
+    <string name="zikirs_section_own">My dhikrs</string>
+    <string name="zikirs_target_unlimited">Unlimited</string>
+    <string name="zikirs_add">Add dhikr</string>
+    <string name="zikirs_edit">Edit dhikr</string>
+    <string name="zikirs_delete">Delete dhikr</string>
+    <string name="zikirs_delete_title">Delete this dhikr?</string>
+    <string name="zikirs_delete_message">%1$s will be removed. Your past counts stay in History.</string>
+    <string name="zikirs_field_name">Name</string>
+    <string name="zikirs_field_arabic">Arabic (optional)</string>
+    <string name="zikirs_field_meaning">Meaning (optional)</string>
+    <string name="zikirs_field_target">Target</string>
+    <string name="zikirs_field_target_hint">Leave empty for unlimited</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
 </resources>
