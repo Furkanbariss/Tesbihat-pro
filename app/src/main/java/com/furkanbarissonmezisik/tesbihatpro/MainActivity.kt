@@ -61,7 +61,12 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean =
-        container.volumeKeyDispatcher.onKeyEvent(event.keyCode, event.action, event.repeatCount) ||
-            super.dispatchKeyEvent(event)
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean =
+        handleVolumeKey(event) || super.onKeyDown(keyCode, event)
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean =
+        handleVolumeKey(event) || super.onKeyUp(keyCode, event)
+
+    private fun handleVolumeKey(event: KeyEvent): Boolean =
+        container.volumeKeyDispatcher.onKeyEvent(event.keyCode, event.action, event.repeatCount)
 }

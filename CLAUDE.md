@@ -86,6 +86,8 @@ app/src/main/java/com/furkanbarissonmezisik/tesbihatpro/
     └── settings/             // SettingsScreen, SettingsViewModel
 ```
 
+`tools/` ses ve ikon üreten betikleri, `docs/` gizlilik politikasını ve Play notlarını tutar.
+
 **Kurallar**
 
 - `feature` paketleri birbirini import etmez; ortak her şey `core`'da durur.
@@ -195,7 +197,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 | Tesbih (başlangıç) | Boncuklar, büyük sayı, adımın Arapçası ve okunuşu, adım göstergesi (1/3), geri al, sıfırla, karartma düğmesi | Yok |
 | Zikirler | En üstte "Namaz sonrası tesbihat", altında hazır ve kendi zikirlerin; ekle, düzenle, sil (hazırlar hariç) | Yok |
 | Geçmiş | Bugünün özeti, son 30 gün, gün başına zikir toplamları | Banner |
-| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, gizlilik seçenekleri, hakkında | Banner |
+| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, gizlilik seçenekleri, gizlilik politikası, hakkında | Banner |
 
 **Tesbih boncukları (`TesbihBeads`)**
 
@@ -216,7 +218,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 **Ses tuşları (`VolumeKeyDispatcher`)**
 
 - Ayar açıkken ve Tesbih ekranı görünürken Ses Açma = `Tap`, Ses Kısma = `Undo`.
-- `MainActivity.dispatchKeyEvent` olayı `VolumeKeyDispatcher`'a iletir. `CounterRoute` görünürken `DisposableEffect` ile kayıt olur, ekrandan çıkınca kaydı siler.
+- `MainActivity.onKeyDown` ve `onKeyUp` olayı `VolumeKeyDispatcher`'a iletir (`dispatchKeyEvent` `ComponentActivity`'de kısıtlı API'dir). `CounterRoute` görünürken `DisposableEffect` ile kayıt olur, ekrandan çıkınca kaydı siler.
 - Kayıtlı dinleyici yoksa olay sisteme bırakılır, normal ses ayarı çalışır.
 - Basılı tutmada tekrarlanan olaylar (`repeatCount > 0`) sayılmaz.
 
@@ -273,7 +275,7 @@ Claude Code her seferinde tek faz uygular; her faz derlenen, çalışan bir uygu
     - Kabul: banner yalnız Geçmiş ve Ayarlar'da görünür; Tesbih ve Zikirler ekranında hiç reklam isteği yapılmaz.
 9. **Satın alma kaldırıldı**: Uygulama ücretsizdir, hayır için yapılıyor. Play Billing ve `remove_ads` yoktur, `core/billing` silindi.
     - Kabul: kodda ve manifestte satın alma kütüphanesi ya da izni yoktur.
-10. **Yayın hazırlığı**: uygulama ikonu, release build type, R8 ve keep kuralları, sürüm kodu, gizlilik politikası metni taslağı. Şablondaki `packageScope` satırı release derlemeyi açılışta `IllegalAccessError` ile çökertiyor; satır kaldırılınca uygulama açılıyor, burada çözülür.
+10. **Yayın hazırlığı**: uygulama ikonu, release build type, R8 ve keep kuralları, sürüm kodu, gizlilik politikası metni taslağı.
     - Kabul: `./gradlew bundleRelease` imzasız da olsa hatasız tamamlanır; release APK'da sayım ve reklam çalışır.
 
 ## Claude Code çalışma kuralları
@@ -337,8 +339,9 @@ Bunlar kod dışı işlerdir ve senin yapman gerekir; hedef, Ramazan'dan önce s
 - [ ] Hazır zikir metinleri Diyanet kaynaklarından kontrol edildi
 - [ ] AdMob: gerçek ID'ler yalnız release derlemesinde; hassas kategoriler engellendi
 - [ ] UMP onay formu AB bölgesi simülasyonuyla (debug geography) test edildi
-- [ ] Gizlilik politikası sayfası yayında (reklam kimliği kullanımı belirtildi)
-- [ ] Data safety formu reklam SDK'sının topladığı verilere göre dolduruldu
+- [ ] `docs/gizlilik-politikasi.md` iletişim e-postası eklenerek herkese açık bir adreste yayında (PDF olmaz); adres Play Console'a girildi. Metin değişirse uygulamadaki `privacy_policy_text` de değişir
+- [ ] Data safety formu reklam SDK'sının topladığı verilere göre dolduruldu (`docs/play-data-safety.md`)
 - [ ] Hedef kitle: çocuklara yönelik değil; içerik derecelendirme anketi tamamlandı
-- [ ] Kapalı testte en az 1 hafta gerçek kullanım; çökme ve sayım kaybı kontrol edildi
+- [ ] Kapalı test: 13 Kasım 2023'ten sonra açılmış kişisel hesapta en az 12 kullanıcıyla 14 gün; çökme ve sayım kaybı kontrol edildi
+- [ ] İmzalı AAB Android Studio'dan üretildi (Build > Generate Signed App Bundle); anahtar repoya girmedi
 - [ ] Mağaza sayfası Türkçe ve İngilizce; açıklamada "tesbih", "zikirmatik", "tasbih", "dhikr" geçiyor; ekran görüntüleri hazır

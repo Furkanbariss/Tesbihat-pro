@@ -132,6 +132,19 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun privacyPolicyCanBeReadInsideTheApp() {
+        show()
+
+        row(R.string.settings_privacy_policy).performScrollTo().performClick()
+
+        val text = context.getString(R.string.privacy_policy_text)
+        composeRule.onNodeWithText(text).assertExists()
+
+        composeRule.onNodeWithText(context.getString(R.string.action_close)).performClick()
+        composeRule.onNodeWithText(text).assertDoesNotExist()
+    }
+
+    @Test
     fun aboutShowsTheVersion() {
         show()
 

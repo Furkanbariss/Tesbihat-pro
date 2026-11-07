@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tesbihat Pro</string>
+    <string name="app_name" translatable="false">Tesbihat Pro</string>
     <string name="screen_zikirs">Dhikrs</string>
     <string name="screen_history">History</string>
     <string name="screen_settings">Settings</string>
@@ -9,10 +9,10 @@
     <string name="action_restart">Start again</string>
     <string name="action_cancel">Cancel</string>
     <string name="counter_tap_label">Count</string>
-    <string name="counter_step_indicator">%1$d/%2$d</string>
-    <string name="counter_target">/ %1$d</string>
-    <string name="counter_accessibility_target">%1$s, %2$d / %3$d</string>
-    <string name="counter_accessibility_unlimited">%1$s, %2$d</string>
+    <string name="counter_step_indicator" translatable="false">%1$d/%2$d</string>
+    <string name="counter_target" translatable="false">/ %1$d</string>
+    <string name="counter_accessibility_target" translatable="false">%1$s, %2$d / %3$d</string>
+    <string name="counter_accessibility_unlimited" translatable="false">%1$s, %2$d</string>
     <string name="counter_completed">Completed</string>
     <string name="counter_completed_tesbihat">Tesbihat completed</string>
     <string name="reset_dialog_title">Reset the count?</string>
@@ -62,4 +62,7 @@
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_privacy_options">Privacy options</string>
+    <string name="settings_privacy_policy">Privacy policy</string>
+    <string name="action_close">Close</string>
+    <string name="privacy_policy_text">Tesbihat Pro privacy policy\nLast updated: 7 November 2026\n\nTesbihat Pro is a free app. It needs no account and does not ask for your name, e-mail address or location.\n\nYour counts\nYour counts, dhikrs, daily history and settings are kept only on your device and are not sent to us. If Android backup is turned on, they may be included in the backup in your own Google account. To delete them, clear the app data or uninstall the app.\n\nAdvertising\nThe History and Settings screens show ads from Google AdMob. The tesbih and dhikr screens show no ads and request none. When you open History or Settings, the Google Mobile Ads SDK collects and shares the following for advertising, analytics and fraud prevention: your IP address, which may be used to estimate your general location; interactions such as app launches and taps; diagnostic information such as app launch time; and identifiers such as the Android advertising ID and app set ID. This data is encrypted in transit. Google handles and keeps it under its own rules: https://policies.google.com/technologies/partner-sites\n\nYour choices\nWhere the law requires it, the app asks for your consent before showing ads, and you can change your choice at any time under Privacy options in Settings. You can reset or delete your advertising ID in your device settings.\n\nChildren\nThe app is not directed at children.\n\nChanges and contact\nChanges to this policy are published here. For questions, use the developer contact address on the app\'s Google Play page.</string>
 </resources>

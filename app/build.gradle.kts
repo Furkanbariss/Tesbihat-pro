@@ -50,7 +50,6 @@ android {
             buildConfigField("String", "UMP_TEST_DEVICE_HASH", "\"\"")
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
     }
