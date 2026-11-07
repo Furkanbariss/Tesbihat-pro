@@ -202,9 +202,9 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 - Compose `Canvas` ile çizilir: dikey, hafif kavisli bir ipte görünür yaklaşık 9 boncuk; ortadaki konum vurguludur.
 - Ekranın herhangi bir yerine tek dokunuş = `Tap`. Dizi bir boncuk aralığı kadar aşağı kayar (spring, yaklaşık 150 ms).
 - Hızlı dokunuşlarda animasyon kuyruğa girmez, doğrudan hedef konuma atlar; sayı hiçbir zaman animasyonu beklemez.
-- Aşağı sürükleme bir boncuk aralığını geçince `Tap` sayılır.
-- Adım hedefinde dizide daha büyük ve farklı biçimli imame boncuğu görünür.
-- Görünüm veriyle tanımlanır: `BeadStyle(id, nameRes, baseColor, highlightColor, threadColor)`. MVP'de 2 ücretsiz stil (kehribar, koyu ahşap); gelecekteki modeller bu yapıya eklenir.
+- Kaydırma tek `Tap`'tir: parmak inişi bir sayımdır, kaydırma ne kadar uzun olursa olsun dizi bir boncuk ilerler.
+- Adım hedefinde dizide daha büyük, farklı biçimli ve boncuktan ayrı renkte imame görünür; renk temanın sıcak tonlarından seçilir.
+- Görünüm veriyle tanımlanır: `BeadStyle(id, nameRes, baseColor, highlightColor, threadColor, imameBaseColor, imameHighlightColor)`. MVP'de 2 ücretsiz stil (kehribar, koyu ahşap); gelecekteki modeller bu yapıya eklenir.
 
 **Geri bildirim**
 

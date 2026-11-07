@@ -32,19 +32,3 @@ internal fun visibleBeads(position: Float, beadsPerSide: Int, lastBead: Int?): I
     val last = ceil(position).toInt() + beadsPerSide
     return first..(if (lastBead != null) minOf(last, lastBead) else last)
 }
-
-/**
- * Bir parmağın sürüklemesini sayıma çevirir. Parmağın inişi zaten bir sayımdır, bu yüzden ilk boncuk
- * aralığı o sayıma dahildir; sonraki her aralık bir sayım daha ekler. Yukarı sürükleme sayılmaz.
- */
-internal class BeadDrag(private val startY: Float) {
-    private var counted = 1
-
-    /** [y] konumuna gelince eklenecek sayım adedini döner. */
-    fun advance(y: Float, spacing: Float): Int {
-        val reached = ((y - startY) / spacing).toInt()
-        val newTaps = (reached - counted).coerceAtLeast(0)
-        counted += newTaps
-        return newTaps
-    }
-}

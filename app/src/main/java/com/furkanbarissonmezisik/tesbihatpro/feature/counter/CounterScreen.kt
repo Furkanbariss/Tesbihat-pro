@@ -36,10 +36,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -49,7 +47,6 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
@@ -188,11 +185,7 @@ private fun CounterContent(
         val compact = maxHeight < COMPACT_HEIGHT
         val beadSpacing = (maxHeight / VISIBLE_BEADS).coerceIn(MIN_BEAD_SPACING, MAX_BEAD_SPACING)
         val beadStripWidth = beadSpacing * 1.35f
-        TapArea(
-            beadSpacing = beadSpacing,
-            onTap = onTap,
-            modifier = Modifier.matchParentSize(),
-        )
+        TapArea(onTap = onTap, modifier = Modifier.matchParentSize())
         TesbihBeads(
             position = state.beadPosition,
             imames = state.imames,
@@ -285,34 +278,20 @@ private fun CounterContent(
 }
 
 /**
- * Her parmak inişi hemen bir sayımdır, dokunuş parmak kalkmasını beklemez; iki başparmakla sırayla
- * basmak da sayılır. Aşağı sürükleme [BeadDrag] ile sayım ekler.
+ * Her parmak inişi hemen bir sayımdır, dokunuş parmak kalkmasını beklemez. Kaydırma ne kadar uzun
+ * olursa olsun tek sayımdır; iki başparmakla sırayla basmak ise her basışta sayılır.
  */
 @Composable
-private fun TapArea(beadSpacing: Dp, onTap: () -> Unit, modifier: Modifier = Modifier) {
+private fun TapArea(onTap: () -> Unit, modifier: Modifier = Modifier) {
     val currentOnTap by rememberUpdatedState(onTap)
     val label = stringResource(R.string.counter_tap_label)
-    val spacingPx = with(LocalDensity.current) { beadSpacing.toPx() }
     Box(
         modifier = modifier
-            .pointerInput(spacingPx) {
-                val drags = mutableMapOf<PointerId, BeadDrag>()
+            .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
                         awaitPointerEvent().changes.forEach { change ->
-                            when {
-                                change.changedToDown() -> {
-                                    drags[change.id] = BeadDrag(change.position.y)
-                                    currentOnTap()
-                                }
-                                change.pressed -> {
-                                    val newTaps = drags[change.id]
-                                        ?.advance(change.position.y, spacingPx)
-                                        ?: 0
-                                    repeat(newTaps) { currentOnTap() }
-                                }
-                                else -> drags.remove(change.id)
-                            }
+                            if (change.changedToDown()) currentOnTap()
                         }
                     }
                 }

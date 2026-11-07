@@ -12,6 +12,9 @@ data class BeadStyle(
     val baseColor: Color,
     val highlightColor: Color,
     val threadColor: Color,
+    /** Zikirler arasındaki imame: dizide hemen seçilsin diye boncuktan ayrı bir renktir. */
+    val imameBaseColor: Color,
+    val imameHighlightColor: Color,
 )
 
 object BeadStyles {
@@ -21,6 +24,8 @@ object BeadStyles {
         baseColor = Color(0xFFC4761B),
         highlightColor = Color(0xFFFFD98A),
         threadColor = Color(0xFF8D6E52),
+        imameBaseColor = Color(0xFF8E2A1E),
+        imameHighlightColor = Color(0xFFE9967A),
     )
     val DarkWood = BeadStyle(
         id = "dark_wood",
@@ -28,6 +33,8 @@ object BeadStyles {
         baseColor = Color(0xFF4E2E1C),
         highlightColor = Color(0xFFB07F5A),
         threadColor = Color(0xFF8D6E52),
+        imameBaseColor = Color(0xFFC4761B),
+        imameHighlightColor = Color(0xFFFFD98A),
     )
 
     val all: List<BeadStyle> = listOf(Amber, DarkWood)

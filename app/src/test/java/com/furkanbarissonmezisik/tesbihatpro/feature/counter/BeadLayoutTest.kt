@@ -89,42 +89,4 @@ class BeadLayoutTest {
     fun `visible beads stop at the end of the string`() {
         assertEquals(93..100, visibleBeads(position = 98f, beadsPerSide = 5, lastBead = 100))
     }
-
-    @Test
-    fun `small drag adds nothing because the press already counted`() {
-        assertEquals(0, BeadDrag(startY = 100f).advance(y = 140f, spacing = 50f))
-    }
-
-    @Test
-    fun `drag past one spacing still counts as the single press`() {
-        assertEquals(0, BeadDrag(startY = 100f).advance(y = 170f, spacing = 50f))
-    }
-
-    @Test
-    fun `each further spacing adds one tap`() {
-        val drag = BeadDrag(startY = 100f)
-
-        assertEquals(1, drag.advance(y = 200f, spacing = 50f))
-        assertEquals(0, drag.advance(y = 220f, spacing = 50f))
-        assertEquals(1, drag.advance(y = 250f, spacing = 50f))
-    }
-
-    @Test
-    fun `fast drag across several spacings adds them all at once`() {
-        assertEquals(3, BeadDrag(startY = 0f).advance(y = 210f, spacing = 50f))
-    }
-
-    @Test
-    fun `dragging back and forth does not count the same spacing twice`() {
-        val drag = BeadDrag(startY = 0f)
-
-        assertEquals(1, drag.advance(y = 100f, spacing = 50f))
-        assertEquals(0, drag.advance(y = 10f, spacing = 50f))
-        assertEquals(0, drag.advance(y = 100f, spacing = 50f))
-    }
-
-    @Test
-    fun `upward drag adds nothing`() {
-        assertEquals(0, BeadDrag(startY = 500f).advance(y = 100f, spacing = 50f))
-    }
 }

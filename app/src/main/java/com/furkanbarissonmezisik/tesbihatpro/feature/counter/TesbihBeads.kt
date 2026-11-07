@@ -122,18 +122,19 @@ private class BeadPainter(
         )
     }
 
-    private fun beadBrush(center: Offset, radius: Float) = Brush.radialGradient(
-        colors = listOf(faded(style.highlightColor, center.y), faded(style.baseColor, center.y)),
-        center = center - Offset(radius * 0.35f, radius * 0.35f),
-        radius = radius * 1.6f,
-    )
+    private fun shadedBrush(center: Offset, radius: Float, highlight: Color, base: Color) =
+        Brush.radialGradient(
+            colors = listOf(faded(highlight, center.y), faded(base, center.y)),
+            center = center - Offset(radius * 0.35f, radius * 0.35f),
+            radius = radius * 1.6f,
+        )
 
     private fun drawBead(bead: Int, position: Float) {
         val y = yOf(bead, position)
         val center = Offset(xAt(y), y)
         val radius = spacing * BEAD_RADIUS * focusScale(bead, position)
         scope.drawCircle(
-            brush = beadBrush(center, radius),
+            brush = shadedBrush(center, radius, style.highlightColor, style.baseColor),
             radius = radius,
             center = center,
         )
@@ -145,14 +146,19 @@ private class BeadPainter(
         val radius = spacing * BEAD_RADIUS * focusScale(bead, position)
         val size = Size(radius * 2 * IMAME_WIDTH, radius * 2 * IMAME_HEIGHT)
         scope.drawOval(
-            brush = beadBrush(center, size.height / 2),
+            brush = shadedBrush(
+                center = center,
+                radius = size.height / 2,
+                highlight = style.imameHighlightColor,
+                base = style.imameBaseColor,
+            ),
             topLeft = center - Offset(size.width / 2, size.height / 2),
             size = size,
         )
         // İki uçtaki halka imameyi sıradan boncuktan ayırır.
         listOf(-1f, 1f).forEach { end ->
             scope.drawCircle(
-                color = faded(style.threadColor, y),
+                color = faded(style.imameBaseColor, y),
                 radius = radius * 0.2f,
                 center = center + Offset(0f, end * size.height / 2),
             )
