@@ -41,10 +41,11 @@ fun HistoryRoute(
     viewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val settings by viewModel.settings.collectAsState()
     HistoryScreen(
         uiState = uiState,
         onBack = onBack,
-        adBanner = { BannerAd(viewModel.adsController) },
+        adBanner = { BannerAd(viewModel.adsController, enabled = settings.adsEnabled) },
     )
 }
 

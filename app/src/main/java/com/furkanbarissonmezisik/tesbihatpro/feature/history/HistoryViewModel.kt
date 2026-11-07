@@ -9,7 +9,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.furkanbarissonmezisik.tesbihatpro.TesbihApp
 import com.furkanbarissonmezisik.tesbihatpro.core.ads.AdsController
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SettingsRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.AppSettings
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.DailyCount
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.Zikir
 import java.time.LocalDate
@@ -67,8 +69,12 @@ class HistoryViewModel(
     historyRepository: HistoryRepository,
     zikirRepository: ZikirRepository,
     val adsController: AdsController,
+    settingsRepository: SettingsRepository,
     today: LocalDate = LocalDate.now(),
 ) : ViewModel() {
+
+    /** Reklamlar Ayarlar'dan kapatıldıysa banner gösterilmez. */
+    val settings: StateFlow<AppSettings> = settingsRepository.settings
 
     val uiState: StateFlow<HistoryUiState> = combine(
         historyRepository.observeSince(today.minusDays(DAYS_SHOWN - 1)),
@@ -88,6 +94,7 @@ class HistoryViewModel(
                     historyRepository = container.historyRepository,
                     zikirRepository = container.zikirRepository,
                     adsController = container.adsController,
+                    settingsRepository = container.settingsRepository,
                 )
             }
         }

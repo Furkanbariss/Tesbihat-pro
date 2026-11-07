@@ -12,9 +12,9 @@ MVP, namaz sonrası tesbihatı ve serbest zikri dokunarak, titreşimle ve ses tu
 - Hazır zikirler ve kullanıcının kendi zikri, hedef sayısıyla
 - Ses tuşlarıyla sayma, ekranı açık tutma, karartma modu
 - Günlük geçmiş (zikir başına toplam)
-- Ayarlar: ses, titreşim, ses tuşları, ekranı açık tut, tema
+- Ayarlar: ses, titreşim, ses tuşları, ekranı açık tut, tema, reklamlar
 - Türkçe ve İngilizce arayüz
-- AdMob banner (yalnız Geçmiş ve Ayarlar ekranında); uygulama ücretsizdir, satın alma yoktur
+- AdMob banner (yalnız Geçmiş ve Ayarlar ekranında, Ayarlar'dan kapatılabilir); uygulama ücretsizdir, satın alma yoktur
 
 **Bilerek dışarıda bırakılanlar (sonraki sürümler)**
 
@@ -174,7 +174,7 @@ Hazır zikirler ilk açılışta `PresetContent`'ten yüklenir. DataStore'daki `
 
 **DataStore**
 
-- `SettingsStore`: soundEnabled, hapticsEnabled, volumeKeysEnabled, keepScreenOn, theme (sistem/açık/koyu), beadStyleId
+- `SettingsStore`: soundEnabled, hapticsEnabled, volumeKeysEnabled, keepScreenOn, theme (sistem/açık/koyu), beadStyleId, adsEnabled
 - `SessionStore`: aktif adım listesi (zikir id + hedef), stepIndex, count, completed, updatedAt
 
 **Sayımı kaybetmeme kuralı**
@@ -197,12 +197,13 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 | Tesbih (başlangıç) | Boncuklar, büyük sayı, adımın Arapçası ve okunuşu, adım göstergesi (1/3), geri al, sıfırla, karartma düğmesi | Yok |
 | Zikirler | En üstte "Namaz sonrası tesbihat", altında hazır ve kendi zikirlerin; ekle, düzenle, sil (hazırlar hariç) | Yok |
 | Geçmiş | Bugünün özeti, son 30 gün, gün başına zikir toplamları | Banner |
-| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, gizlilik seçenekleri, gizlilik politikası, hakkında | Banner |
+| Ayarlar | Ses, titreşim, ses tuşları, ekranı açık tut, tema, tesbih görünümü, reklamları göster, gizlilik seçenekleri, gizlilik politikası, hakkında | Banner |
 
 **Tesbih boncukları (`TesbihBeads`)**
 
 - Compose `Canvas` ile çizilir: dikey, hafif kavisli bir ipte görünür yaklaşık 9 boncuk; ortadaki konum vurguludur.
 - Ekranın herhangi bir yerine tek dokunuş = `Tap`. Dizi bir boncuk aralığı kadar aşağı kayar (spring, yaklaşık 150 ms).
+- Çoklu dokunuş kapalıdır: üç parmakla basmak tek sayımdır, ekranda parmak varken inen parmaklar sayılmaz. Yeni sayım için bütün parmakların kalkması gerekir.
 - Hızlı dokunuşlarda animasyon kuyruğa girmez, doğrudan hedef konuma atlar; sayı hiçbir zaman animasyonu beklemez.
 - Kaydırma tek `Tap`'tir: parmak inişi bir sayımdır, kaydırma ne kadar uzun olursa olsun dizi bir boncuk ilerler.
 - Adım hedefinde dizide daha büyük, farklı biçimli ve boncuktan ayrı renkte imame görünür; renk temanın sıcak tonlarından seçilir.
@@ -213,7 +214,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 - `Tick`: hafif titreşim (API 29+ `EFFECT_TICK`, altında yaklaşık 10 ms) + `SoundPool` tık sesi
 - `StepCompleted` ve `Milestone`: belirgin çift titreşim + farklı ses, ekranda bir sonraki zikrin adı
 - `SequenceCompleted`: uzun titreşim deseni + "Tesbihat tamamlandı" mesajı ve yeniden başla düğmesi
-- Ses ve titreşim ayarlardan ayrı ayrı kapatılabilir. Efektler olayla aynı karede, ana thread'de tetiklenir.
+- Ses ve titreşim ayarlardan ayrı ayrı kapatılabilir. Ses ilk kurulumda kapalı başlar, camide ilk dokunuş duyulmasın diye; titreşim açık başlar. Efektler olayla aynı karede, ana thread'de tetiklenir.
 
 **Ses tuşları (`VolumeKeyDispatcher`)**
 
@@ -225,7 +226,7 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 **Ekranı açık tutma ve karartma**
 
 - `keepScreenOn` açıkken yalnızca Tesbih ekranında `FLAG_KEEP_SCREEN_ON` uygulanır. Bayrak doğrudan pencereye yazılır; `View.keepScreenOn` durgun ekranda kalkmayabilir.
-- Karartma modu: tam ekran siyah katman + pencere parlaklığı 0.01. Dokunma ve ses tuşları saymaya devam eder; çıkış 1 saniyelik uzun basmayla yapılır. Dokunuş burada parmak kalkınca sayılır, çıkış için yapılan uzun basış sayılmaz. `keepScreenOn` kapalı olsa da ekran açık kalır. Sistem çubukları gizlenmez: gizlemek Android'in "tam ekran" uyarısını açar ve ilk dokunuşu yutar.
+- Karartma modu: tam ekran siyah katman + pencere parlaklığı 0.01. Dokunma ve ses tuşları saymaya devam eder; çıkış 1 saniyelik uzun basmayla yapılır. Dokunuş burada son parmak kalkınca sayılır, çıkış için yapılan uzun basış sayılmaz; çoklu dokunuş burada da tek sayımdır. `keepScreenOn` kapalı olsa da ekran açık kalır. Sistem çubukları gizlenmez: gizlemek Android'in "tam ekran" uyarısını açar ve ilk dokunuşu yutar.
 
 **Dil ve erişilebilirlik**
 
@@ -236,13 +237,15 @@ Uygulama Tesbih ekranıyla açılır ve bu ekranda reklam yoktur; diğer üç ek
 
 Uygulama ücretsizdir ve hayır için yapılır; satın alma yoktur. Tek gelir Geçmiş ve Ayarlar ekranındaki banner'dır.
 
+**Reklamları kapatma**: Amaç kâr değildir; kullanıcı reklamları Ayarlar'daki "Reklamları göster" anahtarıyla kapatabilir, varsayılan açıktır. Kapalıyken banner kaldırılır; onay formu, SDK başlatma ve reklam isteği çalışmaz.
+
 **İbadet kuralı**: İbadet sırasında açılabilecek ekranlarda (Tesbih, Zikirler, ileride müezzin modu) reklam olmaz. Bu ekranlarda reklam kodu hiç çalışmaz, reklam için ağ trafiği de oluşmaz; yeni ekran eklerken bu soru sorulur.
 
 **Onay ve başlatma**
 
 - `ConsentManager` (UMP) uygulama açılışında değil, ilk reklamlı ekrana (Geçmiş veya Ayarlar) girişte çalışır: onay bilgisini günceller, gerekiyorsa formu gösterir. Form açılışta çıksaydı ibadet sırasında Tesbih ekranını kapatırdı. `canRequestAds` true olmadan reklam isteği yapılmaz.
 - `MobileAds` onaydan sonra arka planda başlatılır.
-- Ayarlarda, UMP gerektiriyorsa "Gizlilik seçenekleri" girişi gösterilir.
+- Ayarlarda, UMP gerektiriyorsa ve reklamlar açıksa "Gizlilik seçenekleri" girişi gösterilir.
 
 **Banner**
 
@@ -339,7 +342,7 @@ Bunlar kod dışı işlerdir ve senin yapman gerekir; hedef, Ramazan'dan önce s
 - [ ] Hazır zikir metinleri Diyanet kaynaklarından kontrol edildi
 - [ ] AdMob: gerçek ID'ler yalnız release derlemesinde; hassas kategoriler engellendi
 - [ ] UMP onay formu AB bölgesi simülasyonuyla (debug geography) test edildi
-- [ ] `docs/gizlilik-politikasi.md` iletişim e-postası eklenerek herkese açık bir adreste yayında (PDF olmaz); adres Play Console'a girildi. Metin değişirse uygulamadaki `privacy_policy_text` de değişir
+- [ ] `docs/gizlilik-politikasi.md` herkese açık bir adreste yayında (PDF olmaz); adres Play Console'a girildi. Metin değişirse uygulamadaki `privacy_policy_text` de değişir
 - [ ] Data safety formu reklam SDK'sının topladığı verilere göre dolduruldu (`docs/play-data-safety.md`)
 - [ ] Hedef kitle: çocuklara yönelik değil; içerik derecelendirme anketi tamamlandı
 - [ ] Kapalı test: 13 Kasım 2023'ten sonra açılmış kişisel hesapta en az 12 kullanıcıyla 14 gün; çökme ve sayım kaybı kontrol edildi

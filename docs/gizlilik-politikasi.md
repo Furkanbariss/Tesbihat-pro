@@ -2,7 +2,7 @@
 
 Son güncelleme: 7 Kasım 2026
 
-Bu metin uygulama içindeki Gizlilik politikası ile aynıdır. Google Play için herkese açık bir adreste yayınlanmalıdır; PDF kabul edilmez. Yayınlamadan önce `[iletişim e-postası]` alanını doldur, bu not satırını sil.
+Bu metin uygulama içindeki Gizlilik politikası ile aynıdır. Google Play için herkese açık bir adreste yayınlanmalıdır; PDF kabul edilmez. Yayınlamadan önce bu not satırını sil.
 
 Tesbihat Pro ücretsiz bir uygulamadır. Hesap gerektirmez; adınızı, e-posta adresinizi veya konumunuzu istemez.
 
@@ -23,7 +23,7 @@ Bu veriler aktarım sırasında şifrelenir. Google bunları [kendi kurallarına
 
 ## Seçimleriniz
 
-Yasaların gerektirdiği yerlerde uygulama reklam göstermeden önce onayınızı ister; seçiminizi Ayarlar içindeki Gizlilik seçenekleri bölümünden istediğiniz zaman değiştirebilirsiniz. Reklam kimliğinizi cihaz ayarlarından sıfırlayabilir veya silebilirsiniz.
+Reklamları Ayarlar'dan kapatabilirsiniz; kapalıyken uygulama reklam göstermez ve reklam istemez. Yasaların gerektirdiği yerlerde uygulama reklam göstermeden önce onayınızı ister; seçiminizi Ayarlar içindeki Gizlilik seçenekleri bölümünden istediğiniz zaman değiştirebilirsiniz. Reklam kimliğinizi cihaz ayarlarından sıfırlayabilir veya silebilirsiniz.
 
 ## Çocuklar
 
@@ -31,7 +31,7 @@ Uygulama çocuklara yönelik değildir.
 
 ## Değişiklikler ve iletişim
 
-Bu politikadaki değişiklikler burada yayımlanır. Sorularınız için: [iletişim e-postası]
+Bu politikadaki değişiklikler burada yayımlanır. Sorularınız için: fbsonmezisik@outlook.com
 
 ---
 
@@ -58,7 +58,7 @@ This data is encrypted in transit. Google handles and keeps it under [its own ru
 
 ## Your choices
 
-Where the law requires it, the app asks for your consent before showing ads, and you can change your choice at any time under Privacy options in Settings. You can reset or delete your advertising ID in your device settings.
+You can turn ads off in Settings; while they are off, the app shows and requests no ads. Where the law requires it, the app asks for your consent before showing ads, and you can change your choice at any time under Privacy options in Settings. You can reset or delete your advertising ID in your device settings.
 
 ## Children
 
@@ -66,4 +66,4 @@ The app is not directed at children.
 
 ## Changes and contact
 
-Changes to this policy are published here. For questions: [iletişim e-postası]
+Changes to this policy are published here. For questions: fbsonmezisik@outlook.com

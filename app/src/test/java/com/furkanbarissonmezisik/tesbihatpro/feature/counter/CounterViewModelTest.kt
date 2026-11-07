@@ -45,7 +45,7 @@ class CounterViewModelTest {
     private val store = FakeSessionStore()
     private val dao = FakeZikirDao()
     private val dailyDao = FakeDailyCountDao()
-    private val settingsStore = FakeSettingsStore()
+    private val settingsStore = FakeSettingsStore(AppSettings(soundEnabled = true))
     private val volumeKeys = VolumeKeyDispatcher()
     private val day = "2027-02-08"
     private val haptics = RecordingHaptics()
@@ -544,6 +544,18 @@ class CounterViewModelTest {
 
 
     @Test
+    fun `a fresh install counts silently but still vibrates`() = runTest(mainDispatcher) {
+        settingsStore.update { AppSettings() }
+        val viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.onTap()
+
+        assertTrue(sound.effects.isEmpty())
+        assertEquals(1, haptics.effects.size)
+    }
+
+    @Test
     fun `sound off silences taps but keeps vibration`() = runTest(mainDispatcher) {
         settingsStore.update { it.copy(soundEnabled = false) }
         val viewModel = createViewModel()
@@ -632,7 +644,7 @@ class CounterViewModelTest {
         runCurrent()
 
         assertEquals(
-            AppSettings(keepScreenOn = false, beadStyleId = "dark_wood"),
+            AppSettings(soundEnabled = true, keepScreenOn = false, beadStyleId = "dark_wood"),
             viewModel.settings.value,
         )
     }

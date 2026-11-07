@@ -1,5 +1,6 @@
 package com.furkanbarissonmezisik.tesbihatpro.feature.counter
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performTouchInput
@@ -111,7 +112,7 @@ class CounterScreenTest {
     }
 
     @Test
-    fun overlappingFingersEachCount() {
+    fun overlappingFingersCountOnce() {
         tapArea.performTouchInput {
             down(pointerId = 1, position = center)
             advanceEventTime(50)
@@ -119,6 +120,54 @@ class CounterScreenTest {
             advanceEventTime(50)
             up(pointerId = 1)
             up(pointerId = 2)
+        }
+
+        assertEquals(1, taps)
+    }
+
+    @Test
+    fun threeFingersAtOnceCountOnce() {
+        tapArea.performTouchInput {
+            down(pointerId = 1, position = center - Offset(60f, 0f))
+            advanceEventTime(15)
+            down(pointerId = 2, position = center)
+            advanceEventTime(15)
+            down(pointerId = 3, position = center + Offset(60f, 0f))
+            advanceEventTime(100)
+            up(pointerId = 1)
+            up(pointerId = 2)
+            up(pointerId = 3)
+        }
+
+        assertEquals(1, taps)
+    }
+
+    @Test
+    fun fingerLandingWhileAnotherRestsDoesNotCount() {
+        tapArea.performTouchInput {
+            down(pointerId = 1, position = center)
+            advanceEventTime(50)
+            down(pointerId = 2, position = centerLeft)
+            up(pointerId = 2)
+            advanceEventTime(200)
+            down(pointerId = 2, position = centerLeft)
+            up(pointerId = 2)
+        }
+
+        assertEquals(1, taps)
+    }
+
+    @Test
+    fun nextTapCountsOnceEveryFingerHasLifted() {
+        tapArea.performTouchInput {
+            down(pointerId = 1, position = center)
+            down(pointerId = 2, position = centerLeft)
+            up(pointerId = 1)
+            up(pointerId = 2)
+        }
+        tapArea.performTouchInput {
+            down(center)
+            up()
         }
 
         assertEquals(2, taps)

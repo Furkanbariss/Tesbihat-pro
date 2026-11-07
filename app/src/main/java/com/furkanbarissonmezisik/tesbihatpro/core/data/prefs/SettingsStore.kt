@@ -51,6 +51,7 @@ class DataStoreSettingsStore(private val context: Context) : SettingsStore {
                 preferences[Keys.KEEP_SCREEN_ON] = updated.keepScreenOn
                 preferences[Keys.THEME] = updated.theme.name
                 preferences[Keys.BEAD_STYLE] = updated.beadStyleId
+                preferences[Keys.ADS] = updated.adsEnabled
             }
         } catch (exception: IOException) {
             Log.e(TAG, "Ayarlar yazılamadı", exception)
@@ -66,6 +67,7 @@ class DataStoreSettingsStore(private val context: Context) : SettingsStore {
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: defaults.keepScreenOn,
             theme = ThemeMode.entries.find { it.name == this[Keys.THEME] } ?: defaults.theme,
             beadStyleId = this[Keys.BEAD_STYLE] ?: defaults.beadStyleId,
+            adsEnabled = this[Keys.ADS] ?: defaults.adsEnabled,
         )
     }
 
@@ -76,5 +78,6 @@ class DataStoreSettingsStore(private val context: Context) : SettingsStore {
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val THEME = stringPreferencesKey("theme")
         val BEAD_STYLE = stringPreferencesKey("bead_style_id")
+        val ADS = booleanPreferencesKey("ads_enabled")
     }
 }

@@ -32,25 +32,30 @@ private const val HINT_MILLIS = 3_000L
 /**
  * Normal ekranda dokunuş parmak iner inmez sayılır; burada çıkış uzun basışla yapıldığı için sayım
  * parmak kalkınca yapılır, yoksa çıkmak için yapılan her basış bir sayım eklerdi.
+ *
+ * Çoklu dokunuş kapalıdır: ilk parmağın inişinden son parmağın kalkışına kadar süren basış tek
+ * sayımdır ve çıkış süresi ilk parmağın inişinden ölçülür.
  */
 internal class DimPressTracker(private val exitHoldMillis: Long) {
-    private val pressedAt = mutableMapOf<Long, Long>()
+    private val pressed = mutableSetOf<Long>()
+    private var pressStartedAt = 0L
 
     fun press(pointer: Long, time: Long) {
-        pressedAt[pointer] = time
+        if (pressed.isEmpty()) pressStartedAt = time
+        pressed += pointer
     }
 
-    /** Bırakılan basış sayılacaksa true döner. */
+    /** Son parmak kalktığında basış sayılacaksa true döner; öncekiler hiç sayılmaz. */
     fun release(pointer: Long, time: Long): Boolean {
-        val start = pressedAt.remove(pointer) ?: return false
-        return time - start < exitHoldMillis
+        if (!pressed.remove(pointer)) return false
+        return pressed.isEmpty() && time - pressStartedAt < exitHoldMillis
     }
 
     /** Basılı parmak yoksa null döner. */
     fun millisUntilExit(now: Long): Long? =
-        pressedAt.values.minOrNull()?.let { (it + exitHoldMillis - now).coerceAtLeast(0) }
+        if (pressed.isEmpty()) null else (pressStartedAt + exitHoldMillis - now).coerceAtLeast(0)
 
-    fun reset() = pressedAt.clear()
+    fun reset() = pressed.clear()
 }
 
 @Composable

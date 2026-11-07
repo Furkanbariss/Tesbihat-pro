@@ -17,3 +17,4 @@ Uygulamanın kendisi sunucuya veri göndermez; aşağıdakilerin tamamı Google 
 - Uygulamanın kendi sunucusu yok, kullanıcı verisi silme isteği için hesap da yok.
 - Hedef kitle: çocuklara yönelik değil.
 - Uygulama reklam içerir: Evet.
+- Reklamlar Ayarlar'dan kapatılabilir; kapalıyken SDK başlatılmaz ve reklam istenmez. Bu yüzden formdaki "kullanıcılar bu verinin toplanıp toplanmayacağını seçebilir" seçeneği uygun olabilir. Reklamlar varsayılan açık olduğundan bu benim yorumumdur; işaretlemeden önce [Data safety yardım sayfasından](https://support.google.com/googleplay/android-developer/answer/10787469) kontrol et.

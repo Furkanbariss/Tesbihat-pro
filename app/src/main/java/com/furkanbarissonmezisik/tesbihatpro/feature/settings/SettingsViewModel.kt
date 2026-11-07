@@ -39,6 +39,9 @@ class SettingsViewModel(
     fun onBeadStyleChange(id: String) =
         settingsRepository.update { it.copy(beadStyleId = id) }
 
+    fun onAdsChange(enabled: Boolean) =
+        settingsRepository.update { it.copy(adsEnabled = enabled) }
+
     fun onPrivacyOptions(activity: Activity) = adsController.showPrivacyOptions(activity)
 
     companion object {

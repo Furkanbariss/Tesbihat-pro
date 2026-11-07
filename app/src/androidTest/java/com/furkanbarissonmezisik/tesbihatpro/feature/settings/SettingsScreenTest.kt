@@ -6,10 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.furkanbarissonmezisik.tesbihatpro.R
@@ -50,6 +53,7 @@ class SettingsScreenTest {
                     onKeepScreenOnChange = { settings = settings.copy(keepScreenOn = it) },
                     onThemeChange = { settings = settings.copy(theme = it) },
                     onBeadStyleChange = { settings = settings.copy(beadStyleId = it) },
+                    onAdsChange = { settings = settings.copy(adsEnabled = it) },
                 )
             }
         }
@@ -58,20 +62,27 @@ class SettingsScreenTest {
 
     private fun row(id: Int) = composeRule.onNodeWithText(context.getString(id))
 
+    /** Liste tembel çizilir; aşağıdaki satırlar kaydırılmadan ağaçta yoktur. */
+    private fun scrollTo(text: String) {
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text))
+    }
+
+    private fun scrollTo(id: Int) = scrollTo(context.getString(id))
+
     @Test
     fun switchRowReflectsAndChangesItsSetting() {
         val settings = show()
 
-        row(R.string.settings_sound).assertIsOn()
+        row(R.string.settings_sound).assertIsOff()
         row(R.string.settings_sound).performClick()
 
-        row(R.string.settings_sound).assertIsOff()
-        assertEquals(false, settings().soundEnabled)
+        row(R.string.settings_sound).assertIsOn()
+        assertEquals(true, settings().soundEnabled)
     }
 
     @Test
     fun switchRowsAreIndependent() {
-        val settings = show()
+        val settings = show(AppSettings(soundEnabled = true))
 
         row(R.string.settings_vibration).performClick()
 
@@ -119,6 +130,7 @@ class SettingsScreenTest {
     fun privacyEntryIsHiddenWhenNotRequired() {
         show()
 
+        scrollTo(R.string.settings_privacy_policy)
         row(R.string.settings_privacy_options).assertDoesNotExist()
     }
 
@@ -126,16 +138,39 @@ class SettingsScreenTest {
     fun privacyEntryOpensTheFormWhenRequired() {
         show(privacyOptionsRequired = true)
 
-        row(R.string.settings_privacy_options).performScrollTo().performClick()
+        scrollTo(R.string.settings_privacy_options)
+        row(R.string.settings_privacy_options).performClick()
 
         assertEquals(1, privacyClicks)
+    }
+
+    @Test
+    fun adsAreOnUntilTurnedOff() {
+        val settings = show()
+
+        scrollTo(R.string.settings_ads)
+        row(R.string.settings_ads).assertIsOn()
+        row(R.string.settings_ads).performClick()
+
+        row(R.string.settings_ads).assertIsOff()
+        assertEquals(false, settings().adsEnabled)
+    }
+
+    @Test
+    fun privacyEntryIsHiddenWhileAdsAreOff() {
+        show(AppSettings(adsEnabled = false), privacyOptionsRequired = true)
+
+        scrollTo(R.string.settings_privacy_policy)
+        row(R.string.settings_ads).assertIsOff()
+        row(R.string.settings_privacy_options).assertDoesNotExist()
     }
 
     @Test
     fun privacyPolicyCanBeReadInsideTheApp() {
         show()
 
-        row(R.string.settings_privacy_policy).performScrollTo().performClick()
+        scrollTo(R.string.settings_privacy_policy)
+        row(R.string.settings_privacy_policy).performClick()
 
         val text = context.getString(R.string.privacy_policy_text)
         composeRule.onNodeWithText(text).assertExists()
@@ -148,7 +183,8 @@ class SettingsScreenTest {
     fun aboutShowsTheVersion() {
         show()
 
-        composeRule.onNodeWithText(context.getString(R.string.settings_about_version, "1.2"))
-            .performScrollTo()
+        val version = context.getString(R.string.settings_about_version, "1.2")
+        scrollTo(version)
+        composeRule.onNodeWithText(version).assertExists()
     }
 }

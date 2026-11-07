@@ -27,12 +27,13 @@ class SettingsViewModelTest {
     fun `each control changes only its own setting`() = runTest {
         val viewModel = viewModel()
         val changes: List<Pair<() -> Unit, AppSettings>> = listOf(
-            { viewModel.onSoundChange(false) } to AppSettings(soundEnabled = false),
+            { viewModel.onSoundChange(true) } to AppSettings(soundEnabled = true),
             { viewModel.onHapticsChange(false) } to AppSettings(hapticsEnabled = false),
             { viewModel.onVolumeKeysChange(false) } to AppSettings(volumeKeysEnabled = false),
             { viewModel.onKeepScreenOnChange(false) } to AppSettings(keepScreenOn = false),
             { viewModel.onThemeChange(ThemeMode.DARK) } to AppSettings(theme = ThemeMode.DARK),
             { viewModel.onBeadStyleChange("dark_wood") } to AppSettings(beadStyleId = "dark_wood"),
+            { viewModel.onAdsChange(false) } to AppSettings(adsEnabled = false),
         )
 
         changes.forEach { (change, expected) ->

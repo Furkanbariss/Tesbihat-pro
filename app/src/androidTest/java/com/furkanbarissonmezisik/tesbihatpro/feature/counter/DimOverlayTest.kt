@@ -1,6 +1,7 @@
 package com.furkanbarissonmezisik.tesbihatpro.feature.counter
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -76,7 +77,7 @@ class DimOverlayTest {
     }
 
     @Test
-    fun overlappingFingersEachCount() {
+    fun overlappingFingersCountOnce() {
         show()
 
         composeRule.onNodeWithTag("dim").performTouchInput {
@@ -90,7 +91,49 @@ class DimOverlayTest {
         }
         composeRule.waitForIdle()
 
-        assertEquals(2, taps)
+        assertEquals(1, taps)
+    }
+
+    @Test
+    fun threeFingersAtOnceCountOnce() {
+        show()
+
+        composeRule.onNodeWithTag("dim").performTouchInput {
+            down(pointerId = 1, position = center - Offset(60f, 0f))
+            advanceEventTime(15)
+            down(pointerId = 2, position = center)
+            advanceEventTime(15)
+            down(pointerId = 3, position = center + Offset(60f, 0f))
+            advanceEventTime(100)
+            up(pointerId = 1)
+            up(pointerId = 2)
+            up(pointerId = 3)
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(1, taps)
+        assertEquals(0, exits)
+    }
+
+    @Test
+    fun holdingTwoFingersForASecondExitsWithoutCounting() {
+        show()
+
+        composeRule.onNodeWithTag("dim").performTouchInput {
+            down(pointerId = 1, position = center)
+            advanceEventTime(20)
+            down(pointerId = 2, position = centerLeft)
+            advanceEventTime(1_200)
+        }
+        composeRule.mainClock.advanceTimeBy(1_200)
+        composeRule.onNodeWithTag("dim").performTouchInput {
+            up(pointerId = 1)
+            up(pointerId = 2)
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(0, taps)
+        assertEquals(1, exits)
     }
 
     @Test

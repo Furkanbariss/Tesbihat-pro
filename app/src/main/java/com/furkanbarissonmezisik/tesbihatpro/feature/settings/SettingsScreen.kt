@@ -65,8 +65,9 @@ fun SettingsRoute(
         onKeepScreenOnChange = viewModel::onKeepScreenOnChange,
         onThemeChange = viewModel::onThemeChange,
         onBeadStyleChange = viewModel::onBeadStyleChange,
+        onAdsChange = viewModel::onAdsChange,
         onPrivacyOptions = { viewModel.onPrivacyOptions(view.context.findActivity()) },
-        adBanner = { BannerAd(viewModel.adsController) },
+        adBanner = { BannerAd(viewModel.adsController, enabled = settings.adsEnabled) },
     )
 }
 
@@ -82,6 +83,7 @@ fun SettingsScreen(
     onKeepScreenOnChange: (Boolean) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
     onBeadStyleChange: (String) -> Unit,
+    onAdsChange: (Boolean) -> Unit,
     onPrivacyOptions: () -> Unit,
     adBanner: @Composable () -> Unit = {},
 ) {
@@ -152,8 +154,17 @@ fun SettingsScreen(
                     onSelect = onBeadStyleChange,
                 )
             }
-            item { SectionTitle(stringResource(R.string.settings_section_about)) }
-            if (privacyOptionsRequired) {
+            item { SectionTitle(stringResource(R.string.settings_section_ads)) }
+            item {
+                SwitchRow(
+                    title = stringResource(R.string.settings_ads),
+                    hint = stringResource(R.string.settings_ads_hint),
+                    checked = settings.adsEnabled,
+                    onChange = onAdsChange,
+                )
+            }
+            // Reklamlar kapalıyken onay hiçbir şey için kullanılmadığından giriş gizlenir.
+            if (privacyOptionsRequired && settings.adsEnabled) {
                 item {
                     ListItem(
                         modifier = Modifier.clickable(onClick = onPrivacyOptions),
@@ -163,6 +174,7 @@ fun SettingsScreen(
                     )
                 }
             }
+            item { SectionTitle(stringResource(R.string.settings_section_about)) }
             item {
                 ListItem(
                     modifier = Modifier.clickable { showPrivacyPolicy = true },

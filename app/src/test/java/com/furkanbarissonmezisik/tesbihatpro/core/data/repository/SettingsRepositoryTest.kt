@@ -16,15 +16,16 @@ import org.junit.Test
 class SettingsRepositoryTest {
 
     @Test
-    fun `defaults keep every feature on and follow the system theme`() {
+    fun `defaults start silent and keep the other features on`() {
         assertEquals(
             AppSettings(
-                soundEnabled = true,
+                soundEnabled = false,
                 hapticsEnabled = true,
                 volumeKeysEnabled = true,
                 keepScreenOn = true,
                 theme = ThemeMode.SYSTEM,
                 beadStyleId = "amber",
+                adsEnabled = true,
             ),
             AppSettings(),
         )
@@ -32,7 +33,7 @@ class SettingsRepositoryTest {
 
     @Test
     fun `stored settings replace the defaults once read`() = runTest {
-        val stored = AppSettings(soundEnabled = false, theme = ThemeMode.DARK)
+        val stored = AppSettings(soundEnabled = true, theme = ThemeMode.DARK)
         val repository = SettingsRepository(FakeSettingsStore(stored), backgroundScope)
 
         runCurrent()
@@ -72,11 +73,11 @@ class SettingsRepositoryTest {
         val repository = SettingsRepository(store, backgroundScope)
         runCurrent()
 
-        repository.update { it.copy(soundEnabled = false) }
+        repository.update { it.copy(soundEnabled = true) }
         repository.update { it.copy(keepScreenOn = false) }
         runCurrent()
 
-        assertFalse(store.current.soundEnabled)
+        assertTrue(store.current.soundEnabled)
         assertFalse(store.current.keepScreenOn)
     }
 }

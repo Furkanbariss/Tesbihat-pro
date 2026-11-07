@@ -2,11 +2,13 @@ package com.furkanbarissonmezisik.tesbihatpro.feature.history
 
 import com.furkanbarissonmezisik.tesbihatpro.core.content.PresetContent
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.HistoryRepository
+import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.SettingsRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.data.repository.ZikirRepository
 import com.furkanbarissonmezisik.tesbihatpro.core.domain.model.DailyCount
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeAdsController
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeContentVersionStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeDailyCountDao
+import com.furkanbarissonmezisik.tesbihatpro.testing.FakeSettingsStore
 import com.furkanbarissonmezisik.tesbihatpro.testing.FakeZikirDao
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -34,6 +37,7 @@ class HistoryViewModelTest {
     private val today = LocalDate.of(2027, 2, 8)
     private val zikirs = PresetContent.zikirs
     private val dao = FakeDailyCountDao()
+    private val settingsStore = FakeSettingsStore()
 
     @Before
     fun setUp() = Dispatchers.setMain(mainDispatcher)
@@ -53,6 +57,7 @@ class HistoryViewModelTest {
                 backgroundScope,
             ),
             adsController = FakeAdsController(),
+            settingsRepository = SettingsRepository(settingsStore, backgroundScope),
             today = today,
         )
         backgroundScope.launch { viewModel.uiState.collect {} }
@@ -163,5 +168,16 @@ class HistoryViewModelTest {
         runCurrent()
 
         assertEquals(HistoryUiState(), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `ads turned off in settings reach the history screen`() = runTest(mainDispatcher) {
+        val viewModel = createViewModel(repository())
+        assertTrue(viewModel.settings.value.adsEnabled)
+
+        settingsStore.update { it.copy(adsEnabled = false) }
+        runCurrent()
+
+        assertFalse(viewModel.settings.value.adsEnabled)
     }
 }

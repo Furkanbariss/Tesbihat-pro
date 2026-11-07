@@ -37,12 +37,46 @@ class DimPressTrackerTest {
     }
 
     @Test
-    fun `two fingers count separately even when they overlap`() {
+    fun `overlapping fingers count once when the last one lifts`() {
         tracker.press(pointer = 1, time = 0)
         tracker.press(pointer = 2, time = 50)
 
-        assertTrue(tracker.release(pointer = 1, time = 100))
+        assertFalse(tracker.release(pointer = 1, time = 100))
         assertTrue(tracker.release(pointer = 2, time = 150))
+    }
+
+    @Test
+    fun `three fingers at once count once`() {
+        tracker.press(pointer = 1, time = 0)
+        tracker.press(pointer = 2, time = 10)
+        tracker.press(pointer = 3, time = 20)
+
+        val counted = listOf(
+            tracker.release(pointer = 1, time = 120),
+            tracker.release(pointer = 2, time = 125),
+            tracker.release(pointer = 3, time = 130),
+        )
+
+        assertEquals(listOf(false, false, true), counted)
+    }
+
+    @Test
+    fun `a new press counts again once every finger has lifted`() {
+        tracker.press(pointer = 1, time = 0)
+        tracker.release(pointer = 1, time = 100)
+
+        tracker.press(pointer = 2, time = 200)
+
+        assertTrue(tracker.release(pointer = 2, time = 300))
+    }
+
+    @Test
+    fun `a press that lasts past the limit across fingers does not count`() {
+        tracker.press(pointer = 1, time = 0)
+        tracker.press(pointer = 2, time = 600)
+        tracker.release(pointer = 1, time = 700)
+
+        assertFalse(tracker.release(pointer = 2, time = 1_100))
     }
 
     @Test
@@ -59,9 +93,18 @@ class DimPressTrackerTest {
     }
 
     @Test
-    fun `oldest press decides the exit time`() {
+    fun `first finger of the press decides the exit time`() {
         tracker.press(pointer = 1, time = 0)
         tracker.press(pointer = 2, time = 600)
+
+        assertEquals(300L, tracker.millisUntilExit(now = 700))
+    }
+
+    @Test
+    fun `exit time stays with the first finger after it lifts`() {
+        tracker.press(pointer = 1, time = 0)
+        tracker.press(pointer = 2, time = 600)
+        tracker.release(pointer = 1, time = 650)
 
         assertEquals(300L, tracker.millisUntilExit(now = 700))
     }

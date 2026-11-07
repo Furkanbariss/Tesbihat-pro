@@ -30,9 +30,13 @@ private const val TAG = "BannerAd"
 /**
  * Yalnız Geçmiş ve Ayarlar'da kullanılır. İbadet sırasında açılabilecek ekranlara konmaz; bu kural
  * Tesbih ve Zikirler'de reklam kodunun hiç çalışmamasına da dayanır.
+ *
+ * [enabled] kullanıcının Ayarlar'daki seçimidir. Kapalıyken onay formu açılmaz, SDK başlatılmaz ve
+ * reklam istenmez; açık banner da kaldırılır.
  */
 @Composable
-fun BannerAd(adsController: AdsController, modifier: Modifier = Modifier) {
+fun BannerAd(adsController: AdsController, enabled: Boolean, modifier: Modifier = Modifier) {
+    if (!enabled) return
     val view = LocalView.current
     LaunchedEffect(adsController) {
         adsController.prepare(view.context.findActivity())
